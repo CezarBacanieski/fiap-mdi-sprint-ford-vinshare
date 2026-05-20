@@ -44,10 +44,32 @@ function AnimatedSection({ children, delay = 0 }: { children: ReactNode; delay?:
 }
 
 const quickActions = [
-  { label: "Historico", icon: "clipboard-text-clock-outline" as IconName, route: "/(tabs)/services" },
-  { label: "Agendar", icon: "calendar-plus" as IconName, route: "/service/new" },
-  { label: "Pontos", icon: "trophy-outline" as IconName, route: "/(tabs)/rewards" },
-  { label: "Concessionarias", icon: "map-marker-radius-outline" as IconName, route: "/service/new" },
+  {
+    label: "Agendar servico",
+    description: "Escolha oficina, data e horario",
+    icon: "calendar-plus" as IconName,
+    route: "/service/new",
+    gradient: gradients.blueCard,
+    featured: true,
+  },
+  {
+    label: "Historico",
+    description: "Servicos e comprovantes",
+    icon: "clipboard-text-clock-outline" as IconName,
+    route: "/(tabs)/services",
+  },
+  {
+    label: "Pontos Ford+",
+    description: "Saldo e beneficios",
+    icon: "trophy-outline" as IconName,
+    route: "/(tabs)/rewards",
+  },
+  {
+    label: "Concessionarias",
+    description: "Rede oficial proxima",
+    icon: "map-marker-radius-outline" as IconName,
+    route: "/service/new",
+  },
 ] as const;
 
 const getAlertTone = (service: ServiceRecord | undefined) => {
@@ -184,19 +206,45 @@ export default function HomeScreen() {
       </AnimatedSection>
 
       <AnimatedSection delay={260}>
-        <Text style={styles.sectionHeader}>ATALHOS</Text>
-        <View style={styles.quickGrid}>
-          {quickActions.map((action) => (
-            <ThemedCard
-              key={action.label}
-              onPress={() => router.push(action.route)}
-              style={styles.quickCard}
-              contentStyle={styles.quickContent}
-            >
-              <MaterialCommunityIcons name={action.icon} size={28} color={colors.primaryLight} />
-              <Text style={styles.quickLabel}>{action.label}</Text>
-            </ThemedCard>
-          ))}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionHeader}>ATALHOS</Text>
+          <Text style={styles.quickHint}>Acoes rapidas</Text>
+        </View>
+        <View style={styles.quickActions}>
+          {quickActions.map((action) => {
+            const featured = "featured" in action && action.featured;
+
+            return (
+              <ThemedCard
+                key={action.label}
+                onPress={() => router.push(action.route)}
+                gradient={featured ? action.gradient : gradients.card}
+                style={featured ? styles.quickFeaturedCard : styles.quickCard}
+                contentStyle={featured ? styles.quickFeaturedContent : styles.quickContent}
+              >
+                <View style={featured ? styles.quickFeaturedIcon : styles.quickIcon}>
+                  <MaterialCommunityIcons
+                    name={action.icon}
+                    size={featured ? 32 : 24}
+                    color={featured ? colors.white : colors.primaryLight}
+                  />
+                </View>
+                <View style={styles.quickTextBlock}>
+                  <Text style={featured ? styles.quickFeaturedLabel : styles.quickLabel}>
+                    {action.label}
+                  </Text>
+                  <Text style={featured ? styles.quickFeaturedDescription : styles.quickDescription}>
+                    {action.description}
+                  </Text>
+                </View>
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={24}
+                  color={featured ? colors.white : colors.textSecondary}
+                />
+              </ThemedCard>
+            );
+          })}
         </View>
       </AnimatedSection>
 
@@ -361,26 +409,74 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
   },
-  quickGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  quickHint: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+  },
+  quickActions: {
     gap: spacing.md,
     marginBottom: spacing.xl,
   },
+  quickFeaturedCard: {
+    borderColor: "rgba(255,255,255,0.14)",
+  },
+  quickFeaturedContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.md,
+    minHeight: 92,
+  },
   quickCard: {
-    width: "47.8%",
+    borderColor: colors.border,
   },
   quickContent: {
     alignItems: "center",
+    flexDirection: "row",
     gap: spacing.sm,
-    minHeight: 96,
+    minHeight: 72,
+  },
+  quickFeaturedIcon: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderColor: "rgba(255,255,255,0.18)",
+    borderRadius: radius.md,
+    borderWidth: 1,
+    height: 54,
     justifyContent: "center",
+    width: 54,
+  },
+  quickIcon: {
+    alignItems: "center",
+    backgroundColor: "rgba(27,92,255,0.14)",
+    borderRadius: radius.sm,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  quickTextBlock: {
+    flex: 1,
   },
   quickLabel: {
+    ...typography.body,
+    color: colors.textPrimary,
+    fontWeight: "900",
+  },
+  quickFeaturedLabel: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: "900",
+  },
+  quickDescription: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  quickFeaturedDescription: {
     ...typography.caption,
     color: colors.textPrimary,
-    textAlign: "center",
-    textTransform: "uppercase",
+    marginTop: 3,
+    opacity: 0.82,
   },
   sectionRow: {
     alignItems: "center",

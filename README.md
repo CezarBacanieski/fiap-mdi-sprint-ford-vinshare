@@ -61,9 +61,24 @@ Depois, escaneie o QR Code com o Expo Go ou pressione `a` para Android e `i` par
 
 ## Demonstracao Visual
 
-<!-- Add screenshots here after running the app -->
+Foram adicionados **14 prints** do aplicativo em `assets/prints`.
 
-Sugestao de capturas: onboarding, dashboard, detalhe do veiculo, agendamento, rewards e perfil.
+| Print | Arquivo |
+| --- | --- |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203529.png" width="220" alt="Print Ford+ 01"> | `Captura de tela 2026-05-20 203529.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203540.png" width="220" alt="Print Ford+ 02"> | `Captura de tela 2026-05-20 203540.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203547.png" width="220" alt="Print Ford+ 03"> | `Captura de tela 2026-05-20 203547.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203555.png" width="220" alt="Print Ford+ 04"> | `Captura de tela 2026-05-20 203555.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203607.png" width="220" alt="Print Ford+ 05"> | `Captura de tela 2026-05-20 203607.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203618.png" width="220" alt="Print Ford+ 06"> | `Captura de tela 2026-05-20 203618.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203625.png" width="220" alt="Print Ford+ 07"> | `Captura de tela 2026-05-20 203625.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203632.png" width="220" alt="Print Ford+ 08"> | `Captura de tela 2026-05-20 203632.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203641.png" width="220" alt="Print Ford+ 09"> | `Captura de tela 2026-05-20 203641.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203653.png" width="220" alt="Print Ford+ 10"> | `Captura de tela 2026-05-20 203653.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203703.png" width="220" alt="Print Ford+ 11"> | `Captura de tela 2026-05-20 203703.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203719.png" width="220" alt="Print Ford+ 12"> | `Captura de tela 2026-05-20 203719.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203744.png" width="220" alt="Print Ford+ 13"> | `Captura de tela 2026-05-20 203744.png` |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203756.png" width="220" alt="Print Ford+ 14"> | `Captura de tela 2026-05-20 203756.png` |
 
 ## Decisoes Tecnicas
 
