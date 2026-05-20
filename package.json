@@ -1,7 +1,7 @@
 {
   "name": "fiap-mdi-sprint-ford-vinshare",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -9,13 +9,35 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@tanstack/react-query": "^5.100.11",
+    "axios": "^1.16.1",
+    "date-fns": "^4.2.1",
     "expo": "~55.0.25",
+    "expo-constants": "~55.0.16",
+    "expo-device": "~55.0.17",
+    "expo-font": "~55.0.8",
+    "expo-haptics": "~55.0.14",
+    "expo-linear-gradient": "~55.0.14",
+    "expo-notifications": "~55.0.23",
+    "expo-router": "~55.0.15",
+    "expo-splash-screen": "~55.0.21",
     "expo-status-bar": "~55.0.6",
     "react": "19.2.0",
-    "react-native": "0.83.6"
+    "react-native": "0.83.6",
+    "react-native-chart-kit": "^6.12.2",
+    "react-native-gesture-handler": "~2.30.0",
+    "react-native-paper": "^5.15.2",
+    "react-native-reanimated": "4.2.1",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-svg": "15.15.3",
+    "react-native-worklets": "0.7.4"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "babel-preset-expo": "^55.0.22",
     "typescript": "~5.9.2"
   },
   "private": true
