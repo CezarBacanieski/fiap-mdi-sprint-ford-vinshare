@@ -61,6 +61,18 @@ Depois, escaneie o QR Code com o Expo Go ou pressione `a` para Android e `i` par
 
 ## Demonstracao Visual
 
+### Video demonstrativo
+
+Veja o Ford+ em funcionamento no YouTube Shorts:
+
+<a href="https://youtube.com/shorts/XM4Dn7UZGRs?feature=share">
+  <img src="https://img.youtube.com/vi/XM4Dn7UZGRs/hqdefault.jpg" width="360" alt="Video demonstrativo do Ford+">
+</a>
+
+[Assistir ao video demonstrativo](https://youtube.com/shorts/XM4Dn7UZGRs?feature=share)
+
+### Prints do aplicativo
+
 Foram adicionados **14 prints** do aplicativo em `assets/prints`.
 
 | Print | Arquivo |
