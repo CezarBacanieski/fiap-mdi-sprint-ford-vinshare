@@ -1,9 +1,10 @@
-import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
   requestNotificationPermissions,
+  setNotificationBadgeCount,
   scheduleServiceReminder as scheduleReminder,
   sendPointsEarnedNotification as sendPointsNotification,
+  subscribeToForegroundNotifications,
 } from "../services/notifications";
 import { ServiceRecord } from "../types";
 
@@ -28,18 +29,31 @@ export const useNotifications = (): UseNotificationsResult => {
 
   useEffect(() => {
     void requestPermissions();
-    const subscription = Notifications.addNotificationReceivedListener(() => {
+    let isMounted = true;
+    let cleanup: (() => void) | null = null;
+
+    void subscribeToForegroundNotifications(() => {
       setNotificationCount((count) => count + 1);
+    }).then((subscription) => {
+      if (!subscription) return;
+
+      if (!isMounted) {
+        subscription.remove();
+        return;
+      }
+
+      cleanup = () => subscription.remove();
     });
 
     return () => {
-      subscription.remove();
+      isMounted = false;
+      cleanup?.();
     };
   }, [requestPermissions]);
 
   const clearNotificationCount = useCallback(async () => {
     setNotificationCount(0);
-    await Notifications.setBadgeCountAsync(0);
+    await setNotificationBadgeCount(0);
   }, []);
 
   const scheduleServiceReminder = useCallback(async (service: ServiceRecord) => {
