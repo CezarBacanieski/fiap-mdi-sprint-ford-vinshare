@@ -4,6 +4,10 @@
 
 ### Seu Ford, sempre em dia.
 
+Aplicativo mobile desenvolvido para fortalecer o relacionamento entre clientes Ford e a rede oficial de concessionárias, aumentando retenção, recorrência de serviços e engajamento no pós-venda.
+
+<br/>
+
 ![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?style=for-the-badge&logo=react)
 ![Expo](https://img.shields.io/badge/Expo-SDK%2055-000020?style=for-the-badge&logo=expo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)
@@ -11,114 +15,291 @@
 
 </div>
 
-## Sobre o Projeto
+---
 
-Ford+ e um aplicativo mobile criado para o Challenge 02 da FIAP em parceria com a Ford Brasil: **Boosting VIN Share in South America with Intelligent Solutions**.
+# 📖 Sobre o Projeto
 
-VIN Share representa a porcentagem de veiculos Ford que retornam a rede oficial de concessionarias para manutencao e pos-venda. A proposta do Ford+ e fortalecer esse relacionamento com uma experiencia digital util, recorrente e motivadora para proprietarios Ford no Brasil e na America do Sul.
+O **Ford+** é uma solução mobile desenvolvida para o **Challenge 02 da FIAP em parceria com a Ford Brasil**, dentro do tema:
 
-O app centraliza garagem, historico de manutencao, agendamento de servicos, alertas, pontuacao de fidelidade e beneficios. A escolha por mobile aproxima a Ford do momento real de uso do cliente: quando ele recebe um alerta, consulta o historico, agenda uma revisao ou decide voltar para uma concessionaria autorizada.
+> **Boosting VIN Share in South America with Intelligent Solutions**
 
-## Funcionalidades
+O conceito de **VIN Share** representa a porcentagem de veículos Ford que retornam à rede oficial de concessionárias para manutenção e serviços de pós-venda.
 
-- 🚗 Dashboard premium com veiculo principal, quilometragem e Vehicle Health Score.
-- 🔔 Alertas de manutencao e lembretes locais com Expo Notifications.
-- 📋 Historico completo de servicos realizados na rede oficial.
-- 📅 Agendamento em 3 etapas com selecao de veiculo, servico, concessionaria, data e horario.
-- 🏆 Ford+ Rewards com pontos, niveis, historico e resgate de beneficios.
-- 🧰 Breakdown de saude por sistema: motor, freios, pneus, suspensao, ar condicionado e fluidos.
-- 🏢 Lista mockada de concessionarias Ford em Sao Paulo com distancia, nota e horarios.
-- 🔎 Integracao FIPE para buscar modelos Ford reais.
-- 📍 Estrutura ViaCEP para consulta de endereco.
-- 💾 Persistencia local com AsyncStorage e dados semeados no primeiro uso.
-- 🌙 Tema escuro automotivo com azul Ford, vermelho Ford e componentes reutilizaveis.
+O objetivo do Ford+ é aumentar essa retenção por meio de uma experiência digital moderna, centralizada e recorrente, conectando o cliente à Ford durante toda a jornada de propriedade do veículo.
 
-## Integrantes do Grupo
+O aplicativo transforma o pós-venda em uma experiência contínua, oferecendo:
 
-- Milton Cezar Bacanieski — RM 555206
-- Victorio Bastelli — RM 554723
-- Lorenzo Mangini — RM 554901
-- Vitor Bebiano — RM 555026
+- acompanhamento da saúde do veículo;
+- histórico de manutenção;
+- agendamento inteligente;
+- notificações preventivas;
+- programa de fidelidade;
+- benefícios exclusivos.
 
-## Como Rodar o Projeto
+A proposta foi desenhada para aproximar a Ford do momento real de uso do cliente, incentivando o retorno à rede autorizada de maneira prática e estratégica.
 
-### Pre-requisitos
+---
 
-- Node.js LTS instalado.
-- npm instalado.
-- Expo Go no celular ou um emulador iOS/Android configurado.
+# ✨ Principais Funcionalidades
 
-### Passo a passo
+## 🚗 Gestão do Veículo
+
+- Dashboard premium com informações do veículo principal;
+- Vehicle Health Score (pontuação de saúde do veículo);
+- Controle de quilometragem;
+- Breakdown de sistemas:
+  - motor;
+  - freios;
+  - pneus;
+  - suspensão;
+  - ar-condicionado;
+  - fluidos.
+
+## 🔔 Experiência Inteligente
+
+- Alertas de manutenção preventiva;
+- Notificações locais com Expo Notifications;
+- Lembretes de revisão;
+- Avisos de benefícios e recompensas.
+
+## 📅 Pós-venda e Serviços
+
+- Histórico completo de serviços realizados;
+- Agendamento em múltiplas etapas;
+- Seleção de:
+  - veículo;
+  - serviço;
+  - concessionária;
+  - data;
+  - horário.
+
+## 🏆 Fidelização
+
+- Sistema Ford+ Rewards;
+- Acúmulo de pontos;
+- Níveis de fidelidade;
+- Histórico de recompensas;
+- Resgate de benefícios exclusivos.
+
+## 🏢 Rede de Concessionárias
+
+- Lista de concessionárias Ford;
+- Distância e avaliação;
+- Horários de funcionamento;
+- Estrutura preparada para geolocalização futura.
+
+---
+
+# 🛠️ Stack Tecnológica
+
+| Tecnologia | Objetivo |
+|---|---|
+| React Native | Desenvolvimento mobile cross-platform |
+| Expo | Ecossistema e ferramentas de desenvolvimento |
+| TypeScript | Tipagem estática e escalabilidade |
+| Expo Router | Navegação baseada em arquivos |
+| React Query | Gerenciamento de cache e requisições |
+| AsyncStorage | Persistência local de dados |
+| FIPE API | Consulta de modelos Ford |
+| ViaCEP | Estrutura de consulta de endereços |
+
+---
+
+# 🏗️ Arquitetura do Projeto
+
+O projeto foi estruturado com foco em:
+
+- escalabilidade;
+- reutilização de componentes;
+- separação de responsabilidades;
+- facilidade de manutenção.
+
+## Estrutura principal
 
 ```bash
+app/
+ ├── (tabs)/
+ ├── vehicle/[id]
+ ├── service/*
+components/
+ ├── ui/
+ ├── charts/
+hooks/
+services/
+storage/
+````
+
+## Decisões Técnicas
+
+### React Native + Expo
+
+Permite entregar uma experiência consistente para iOS e Android utilizando uma única base de código.
+
+### Expo Router
+
+Organiza a navegação através de rotas baseadas em arquivos, facilitando manutenção e escalabilidade.
+
+### React Query
+
+Centraliza:
+
+* cache;
+* loading;
+* sincronização;
+* tratamento de erros das APIs externas.
+
+### AsyncStorage
+
+Viabiliza persistência local para o MVP sem necessidade de backend dedicado.
+
+---
+
+# 🔌 Integrações Externas
+
+## FIPE API
+
+Consulta de modelos Ford reais:
+
+```http
+GET /carros/marcas/26/modelos
+```
+
+## ViaCEP
+
+Estrutura de enriquecimento de endereços via CEP.
+
+## Expo Notifications
+
+Sistema de notificações locais para:
+
+* lembretes de manutenção;
+* alertas;
+* recompensas.
+
+---
+
+# 📱 Demonstração
+
+## 🎥 Vídeo Demonstrativo
+
+Veja o Ford+ em funcionamento:
+
+<a href="https://youtube.com/shorts/XM4Dn7UZGRs?feature=share">
+  <img src="https://img.youtube.com/vi/XM4Dn7UZGRs/hqdefault.jpg" width="420" alt="Vídeo demonstrativo do Ford+">
+</a>
+
+<br/>
+
+👉 [Assistir demonstração completa](https://youtube.com/shorts/XM4Dn7UZGRs?feature=share)
+
+---
+
+# 🖼️ Screenshots do Aplicativo
+
+<div align="center">
+
+| Home                                                                                | Serviços                                                                    | Perfil                                                                             |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203529.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203618.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203719.png" width="220"> |
+
+| Meus Veículos                                                                         | Pontos                                                                           | Agendamento                                                                     |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203555.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203653.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203756.png" width="220"> |
+
+</div>
+
+---
+
+# 🚀 Como Executar o Projeto
+
+## Pré-requisitos
+
+* Node.js LTS
+* npm
+* Expo Go ou emulador Android/iOS
+
+## Instalação
+
+```bash
+# Clone o repositório
 git clone <url-do-repositorio>
+
+# Acesse a pasta
 cd fiap-mdi-sprint-ford-vinshare
+
+# Instale as dependências
 npm install
+
+# Inicie o projeto
 npx expo start
 ```
 
-Depois, escaneie o QR Code com o Expo Go ou pressione `a` para Android e `i` para iOS.
+Depois disso:
 
-## Demonstracao Visual
+* escaneie o QR Code com o Expo Go;
+* ou pressione:
 
-### Video demonstrativo
+  * `a` para Android;
+  * `i` para iOS.
 
-Veja o Ford+ em funcionamento no YouTube Shorts:
+---
 
-<a href="https://youtube.com/shorts/XM4Dn7UZGRs?feature=share">
-  <img src="https://img.youtube.com/vi/XM4Dn7UZGRs/hqdefault.jpg" width="360" alt="Video demonstrativo do Ford+">
-</a>
+# 🎯 Objetivo Estratégico
 
-[Assistir ao video demonstrativo](https://youtube.com/shorts/XM4Dn7UZGRs?feature=share)
+O Ford+ foi concebido para atuar diretamente nos principais fatores que impactam o VIN Share:
 
-### Prints do aplicativo
+* aumento da recorrência de manutenção;
+* fortalecimento do relacionamento pós-venda;
+* fidelização do cliente;
+* incentivo ao retorno à rede oficial;
+* criação de recorrência digital.
 
-Foram adicionados **14 prints** do aplicativo em `assets/prints`.
+A proposta combina:
 
-| Print | Arquivo |
-| --- | --- |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203529.png" width="220" alt="Print Ford+ 01"> | `Captura de tela 2026-05-20 203529.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203540.png" width="220" alt="Print Ford+ 02"> | `Captura de tela 2026-05-20 203540.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203547.png" width="220" alt="Print Ford+ 03"> | `Captura de tela 2026-05-20 203547.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203555.png" width="220" alt="Print Ford+ 04"> | `Captura de tela 2026-05-20 203555.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203607.png" width="220" alt="Print Ford+ 05"> | `Captura de tela 2026-05-20 203607.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203618.png" width="220" alt="Print Ford+ 06"> | `Captura de tela 2026-05-20 203618.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203625.png" width="220" alt="Print Ford+ 07"> | `Captura de tela 2026-05-20 203625.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203632.png" width="220" alt="Print Ford+ 08"> | `Captura de tela 2026-05-20 203632.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203641.png" width="220" alt="Print Ford+ 09"> | `Captura de tela 2026-05-20 203641.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203653.png" width="220" alt="Print Ford+ 10"> | `Captura de tela 2026-05-20 203653.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203703.png" width="220" alt="Print Ford+ 11"> | `Captura de tela 2026-05-20 203703.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203719.png" width="220" alt="Print Ford+ 12"> | `Captura de tela 2026-05-20 203719.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203744.png" width="220" alt="Print Ford+ 13"> | `Captura de tela 2026-05-20 203744.png` |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203756.png" width="220" alt="Print Ford+ 14"> | `Captura de tela 2026-05-20 203756.png` |
+* experiência do usuário;
+* estratégia de negócio;
+* retenção;
+* tecnologia mobile;
+* gamificação.
 
-## Decisoes Tecnicas
+---
 
-**React Native + Expo**: permite entregar uma experiencia iOS e Android com uma unica base de codigo, aproveitando o ecossistema Expo para notificacoes, fontes, splash screen e desenvolvimento rapido.
+# 🔮 Próximos Passos
 
-**Expo Router**: usa roteamento baseado em arquivos, facilita deep linking e organiza naturalmente a navegacao por tabs, detalhes e fluxos como onboarding e agendamento.
+* Backend com Node.js + PostgreSQL;
+* Integração real com APIs Ford;
+* Push Notifications via FCM/APNs;
+* Autenticação biométrica;
+* Geolocalização em tempo real;
+* Mapa de concessionárias próximas;
+* Sistema de diagnósticos inteligentes;
+* Inspeção assistida com realidade aumentada (AR).
 
-**React Query**: centraliza cache, loading e erros das integracoes externas, especialmente FIPE e a lista de concessionarias.
+---
 
-**AsyncStorage**: atende o MVP sem backend, mantendo usuario, veiculos, servicos, recompensas e flags locais persistidos.
+# 👥 Integrantes
 
-**Arquitetura**: o app usa `app/(tabs)` para as cinco areas principais, rotas dedicadas para `vehicle/[id]` e `service/*`, hooks por dominio, camada de `services/` para APIs e armazenamento, componentes visuais reutilizaveis em `components/ui` e graficos em `components/charts`.
+| Nome                    | RM        |
+| ----------------------- | --------- |
+| Milton Cezar Bacanieski | RM 555206 |
+| Victório Bastelli       | RM 554723 |
+| Lorenzo Mangini         | RM 554901 |
+| Vitor Bebiano           | RM 555026 |
 
-## Integracoes Externas
+---
 
-- **FIPE API**: consulta modelos Ford reais em `GET /carros/marcas/26/modelos`.
-- **ViaCEP**: estrutura de consulta de CEP para enriquecer enderecos de concessionarias.
-- **Expo Notifications**: permissoes e notificacoes locais para lembrete de servico e pontos ganhos.
+# 📩 Contato
 
-## Proximos Passos
+**Professor responsável:**
+[profhercules.ramos@fiap.com.br](mailto:profhercules.ramos@fiap.com.br)
 
-- Integracao backend com Node.js + PostgreSQL.
-- Integracao real com APIs Ford e rede de concessionarias.
-- Push notifications via FCM/APNs.
-- Autenticacao biometrica.
-- Mapa com concessionarias mais proximas.
-- Recurso de AR para inspecao assistida do veiculo.
+---
 
-## Contato
+<div align="center">
 
-profhercules.ramos@fiap.com.br
+### Ford+ • FIAP x Ford Brasil Challenge 2026
+
+Tecnologia, experiência e fidelização no pós-venda automotivo.
+
+</div>
+```
