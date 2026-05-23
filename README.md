@@ -210,6 +210,18 @@ Veja o Ford+ em funcionamento:
 
 ---
 
+## 🎥 Vídeo Demonstrativo
+
+Veja o Ford+ em funcionamento:
+
+<a href="https://youtu.be/nqJf0cdi8Ds?si=pIM6Dl0LUz8Nr8xH">
+  <img src="https://img.youtube.com/vi/nqJf0cdi8Ds/hqdefault.jpg" width="420" alt="Vídeo demonstrativo do Ford+">
+</a>
+
+<br/>
+
+👉 [Assistir demonstração completa](https://youtu.be/nqJf0cdi8Ds?si=pIM6Dl0LUz8Nr8xH)
+
 # 🚀 Como Executar o Projeto
 
 ## Pré-requisitos
