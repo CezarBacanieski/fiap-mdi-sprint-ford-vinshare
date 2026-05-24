@@ -14,6 +14,7 @@ import { maintenanceRecommendations } from "../../constants/mockData";
 import { colors, gradients, spacing, typography } from "../../constants/theme";
 import { useServices } from "../../hooks/useServices";
 import { useVehicles } from "../../hooks/useVehicles";
+import { sanitizeRouteId } from "../../security/validation";
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -30,9 +31,15 @@ export default function VehicleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { vehicles, isLoading: vehiclesLoading } = useVehicles();
   const { historyServices, isLoading: servicesLoading } = useServices();
-  const vehicle = vehicles.find((item) => item.id === id);
-  const services = historyServices.filter((service) => service.vehicleId === id);
-  const recommendations = maintenanceRecommendations.filter((item) => item.vehicleId === id);
+  let safeId = "";
+  try {
+    safeId = sanitizeRouteId(id ?? "");
+  } catch {
+    safeId = "";
+  }
+  const vehicle = vehicles.find((item) => item.id === safeId);
+  const services = historyServices.filter((service) => service.vehicleId === safeId);
+  const recommendations = maintenanceRecommendations.filter((item) => item.vehicleId === safeId);
 
   if (vehiclesLoading || servicesLoading) {
     return (

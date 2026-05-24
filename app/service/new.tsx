@@ -14,6 +14,8 @@ import { colors, radius, spacing, typography } from "../../constants/theme";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useDealerships, useServices } from "../../hooks/useServices";
 import { useVehicles } from "../../hooks/useVehicles";
+import { AppSecurityError } from "../../security/errors";
+import { sanitizeText } from "../../security/sanitization";
 import { lookupCep } from "../../services/api";
 import { Dealership, NewServiceInput } from "../../types";
 
@@ -48,6 +50,7 @@ export default function NewServiceScreen() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("Agendamento confirmado. Lembrete criado.");
   const [cepHint, setCepHint] = useState<string | null>(null);
   const { vehicles } = useVehicles();
   const { addService } = useServices();
@@ -73,7 +76,7 @@ export default function NewServiceScreen() {
   }, [dateOptions, selectedDate]);
 
   const filteredDealerships = useMemo(() => {
-    const term = dealershipSearch.trim().toLocaleLowerCase("pt-BR");
+    const term = sanitizeText(dealershipSearch).trim().toLocaleLowerCase("pt-BR");
     if (!term) return dealerships;
     return dealerships.filter((dealership) => {
       const target = `${dealership.name} ${dealership.address} ${dealership.neighborhood}`.toLocaleLowerCase("pt-BR");
@@ -119,8 +122,16 @@ export default function NewServiceScreen() {
       };
       const service = await addService(input);
       await scheduleServiceReminder(service);
+      setSnackbarMessage("Agendamento confirmado. Lembrete criado.");
       setSnackbarVisible(true);
       setTimeout(() => router.replace("/(tabs)/services"), 850);
+    } catch (error) {
+      if (error instanceof AppSecurityError) {
+        setSnackbarMessage(error.publicMessage);
+      } else {
+        setSnackbarMessage("Não foi possível concluir o agendamento.");
+      }
+      setSnackbarVisible(true);
     } finally {
       setSaving(false);
     }
@@ -210,7 +221,7 @@ export default function NewServiceScreen() {
           <Searchbar
             placeholder="Buscar por nome ou bairro"
             value={dealershipSearch}
-            onChangeText={setDealershipSearch}
+            onChangeText={(value) => setDealershipSearch(sanitizeText(value))}
             style={styles.search}
             inputStyle={styles.searchInput}
           />
@@ -295,7 +306,7 @@ export default function NewServiceScreen() {
           <TextInput
             label="Observacoes especiais"
             value={notes}
-            onChangeText={setNotes}
+            onChangeText={(value) => setNotes(sanitizeText(value))}
             mode="outlined"
             multiline
             numberOfLines={5}
@@ -333,8 +344,8 @@ export default function NewServiceScreen() {
         )}
       </View>
 
-      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={900}>
-        Agendamento confirmado. Lembrete criado.
+      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={1200}>
+        {snackbarMessage}
       </Snackbar>
     </ScreenContainer>
   );

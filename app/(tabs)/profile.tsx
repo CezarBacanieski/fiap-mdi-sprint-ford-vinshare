@@ -1,10 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Divider, Switch, TextInput } from "react-native-paper";
+import { Divider, Snackbar, Switch, TextInput } from "react-native-paper";
 import ScreenContainer from "../../components/ui/ScreenContainer";
 import StatusBadge from "../../components/ui/StatusBadge";
 import ThemedButton from "../../components/ui/ThemedButton";
@@ -14,17 +13,20 @@ import { colors, gradients, radius, spacing, typography } from "../../constants/
 import { useAuth } from "../../hooks/useAuth";
 import { useRewards } from "../../hooks/useRewards";
 import { useVehicles } from "../../hooks/useVehicles";
-import { storageKeys } from "../../services/storage";
+import { setStringItem, getStringItem, storageKeys } from "../../services/storage";
+import { AppSecurityError } from "../../security/errors";
+import { sanitizeText } from "../../security/sanitization";
 import { User } from "../../types";
 
 export default function ProfileScreen() {
   const { user, currentTier, updateUser, isLoading } = useRewards();
   const { vehicles } = useVehicles();
-  const { resetOnboarding } = useAuth();
+  const { signOut, role } = useAuth();
   const [editing, setEditing] = useState(false);
   const [draftUser, setDraftUser] = useState<User | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [reviewRemindersEnabled, setReviewRemindersEnabled] = useState(true);
+  const [snackMessage, setSnackMessage] = useState("");
 
   useEffect(() => {
     if (user) setDraftUser(user);
@@ -33,8 +35,8 @@ export default function ProfileScreen() {
   useEffect(() => {
     const loadSettings = async () => {
       const [notifications, reminders] = await Promise.all([
-        AsyncStorage.getItem(storageKeys.notificationsEnabled),
-        AsyncStorage.getItem(storageKeys.reviewRemindersEnabled),
+        getStringItem(storageKeys.notificationsEnabled),
+        getStringItem(storageKeys.reviewRemindersEnabled),
       ]);
       setNotificationsEnabled(notifications !== "false");
       setReviewRemindersEnabled(reminders !== "false");
@@ -44,23 +46,32 @@ export default function ProfileScreen() {
 
   const toggleNotifications = async (value: boolean) => {
     setNotificationsEnabled(value);
-    await AsyncStorage.setItem(storageKeys.notificationsEnabled, String(value));
+    await setStringItem(storageKeys.notificationsEnabled, String(value));
   };
 
   const toggleReminders = async (value: boolean) => {
     setReviewRemindersEnabled(value);
-    await AsyncStorage.setItem(storageKeys.reviewRemindersEnabled, String(value));
+    await setStringItem(storageKeys.reviewRemindersEnabled, String(value));
   };
 
   const saveProfile = async () => {
     if (!draftUser) return;
-    await updateUser(draftUser);
-    setEditing(false);
+    try {
+      await updateUser(draftUser);
+      setEditing(false);
+      setSnackMessage("Perfil atualizado com segurança.");
+    } catch (error) {
+      if (error instanceof AppSecurityError) {
+        setSnackMessage(error.publicMessage);
+      } else {
+        setSnackMessage("Não foi possível atualizar o perfil.");
+      }
+    }
   };
 
   const resetSession = async () => {
-    await resetOnboarding();
-    router.replace("/onboarding");
+    await signOut();
+    router.replace("/sign-in");
   };
 
   if (isLoading || !user || !draftUser) {
@@ -105,7 +116,9 @@ export default function ProfileScreen() {
               label="Nome"
               value={draftUser.name}
               mode="outlined"
-              onChangeText={(name) => setDraftUser((current) => (current ? { ...current, name } : current))}
+              onChangeText={(name) =>
+                setDraftUser((current) => (current ? { ...current, name: sanitizeText(name) } : current))
+              }
               style={styles.input}
             />
             <TextInput
@@ -113,7 +126,9 @@ export default function ProfileScreen() {
               value={draftUser.email}
               mode="outlined"
               keyboardType="email-address"
-              onChangeText={(email) => setDraftUser((current) => (current ? { ...current, email } : current))}
+              onChangeText={(email) =>
+                setDraftUser((current) => (current ? { ...current, email: sanitizeText(email) } : current))
+              }
               style={styles.input}
             />
             <TextInput
@@ -121,7 +136,9 @@ export default function ProfileScreen() {
               value={draftUser.phone}
               mode="outlined"
               keyboardType="phone-pad"
-              onChangeText={(phone) => setDraftUser((current) => (current ? { ...current, phone } : current))}
+              onChangeText={(phone) =>
+                setDraftUser((current) => (current ? { ...current, phone: sanitizeText(phone) } : current))
+              }
               style={styles.input}
             />
           </View>
@@ -130,6 +147,7 @@ export default function ProfileScreen() {
             <InfoRow label="CPF" value={user.cpf} />
             <InfoRow label="Telefone" value={user.phone} />
             <InfoRow label="Pontos" value={`${user.points.toLocaleString("pt-BR")} pts`} />
+            <InfoRow label="Perfil de acesso" value={role ?? "user"} />
           </View>
         )}
       </ThemedCard>
@@ -190,6 +208,10 @@ export default function ProfileScreen() {
         onPress={resetSession}
         style={styles.logout}
       />
+
+      <Snackbar visible={Boolean(snackMessage)} onDismiss={() => setSnackMessage("")} duration={2200}>
+        {snackMessage}
+      </Snackbar>
     </ScreenContainer>
   );
 }

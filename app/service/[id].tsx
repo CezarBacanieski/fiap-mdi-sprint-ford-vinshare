@@ -9,11 +9,18 @@ import ThemedButton from "../../components/ui/ThemedButton";
 import ThemedCard from "../../components/ui/ThemedCard";
 import { colors, gradients, spacing, typography } from "../../constants/theme";
 import { useServices } from "../../hooks/useServices";
+import { sanitizeRouteId } from "../../security/validation";
 
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { services, isLoading } = useServices();
-  const service = services.find((item) => item.id === id);
+  let safeId = "";
+  try {
+    safeId = sanitizeRouteId(id ?? "");
+  } catch {
+    safeId = "";
+  }
+  const service = services.find((item) => item.id === safeId);
 
   if (isLoading) {
     return (

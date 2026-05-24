@@ -2,13 +2,16 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { FAB, HelperText, Menu, Modal, Portal, TextInput } from "react-native-paper";
+import { FAB, HelperText, Menu, Modal, Portal, Snackbar, TextInput } from "react-native-paper";
 import ScreenContainer from "../../components/ui/ScreenContainer";
 import SkeletonBox from "../../components/ui/SkeletonBox";
 import ThemedButton from "../../components/ui/ThemedButton";
 import VehicleCard from "../../components/ui/VehicleCard";
 import { colors, radius, spacing, typography } from "../../constants/theme";
+import { useAuth } from "../../hooks/useAuth";
 import { useFordModels, useVehicles } from "../../hooks/useVehicles";
+import { AppSecurityError } from "../../security/errors";
+import { sanitizeText } from "../../security/sanitization";
 import { FuelType, NewVehicleInput } from "../../types";
 
 const fuelTypes: FuelType[] = ["Flex", "Gasolina", "Diesel", "Hibrido", "Eletrico"];
@@ -26,12 +29,15 @@ const initialForm: NewVehicleInput = {
 };
 
 export default function VehiclesScreen() {
+  const { hasPermission } = useAuth();
   const { vehicles, isLoading, errorMessage, addVehicle, deleteVehicle } = useVehicles();
   const [modalVisible, setModalVisible] = useState(false);
   const [modelMenuVisible, setModelMenuVisible] = useState(false);
   const [form, setForm] = useState<NewVehicleInput>(initialForm);
   const [saving, setSaving] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
   const { data: fipeModels = [], isFetching } = useFordModels(form.model);
+  const canDeleteVehicle = hasPermission("vehicle:delete");
 
   const formValid = useMemo(() => {
     return form.model.trim().length > 1 && form.plate.trim().length >= 7 && form.mileage >= 0;
@@ -49,6 +55,12 @@ export default function VehiclesScreen() {
     try {
       await addVehicle(form);
       closeModal();
+    } catch (error) {
+      if (error instanceof AppSecurityError) {
+        setSnackMessage(error.publicMessage);
+      } else {
+        setSnackMessage("Não foi possível salvar o veículo.");
+      }
     } finally {
       setSaving(false);
     }
@@ -83,7 +95,19 @@ export default function VehiclesScreen() {
             <VehicleCard
               vehicle={item}
               onPress={() => router.push(`/vehicle/${item.id}`)}
-              onDelete={() => deleteVehicle(item.id)}
+              onDelete={
+                canDeleteVehicle
+                  ? () => {
+                      void deleteVehicle(item.id).catch((error: unknown) => {
+                        if (error instanceof AppSecurityError) {
+                          setSnackMessage(error.publicMessage);
+                          return;
+                        }
+                        setSnackMessage("Não foi possível remover o veículo.");
+                      });
+                    }
+                  : undefined
+              }
             />
           )}
           ListEmptyComponent={
@@ -129,7 +153,7 @@ export default function VehiclesScreen() {
                 right={<TextInput.Icon icon={isFetching ? "loading" : "chevron-down"} />}
                 onFocus={() => setModelMenuVisible(true)}
                 onChangeText={(model) => {
-                  setForm((current) => ({ ...current, model }));
+                  setForm((current) => ({ ...current, model: sanitizeText(model) }));
                   setModelMenuVisible(true);
                 }}
                 style={styles.input}
@@ -155,7 +179,7 @@ export default function VehiclesScreen() {
             label="Versao"
             value={form.version}
             mode="outlined"
-            onChangeText={(version) => setForm((current) => ({ ...current, version }))}
+            onChangeText={(version) => setForm((current) => ({ ...current, version: sanitizeText(version) }))}
             style={styles.input}
           />
 
@@ -179,7 +203,7 @@ export default function VehiclesScreen() {
               value={form.plate}
               mode="outlined"
               autoCapitalize="characters"
-              onChangeText={(plate) => setForm((current) => ({ ...current, plate }))}
+              onChangeText={(plate) => setForm((current) => ({ ...current, plate: sanitizeText(plate) }))}
               style={styles.halfInput}
             />
             <TextInput
@@ -198,7 +222,7 @@ export default function VehiclesScreen() {
             label="Cor"
             value={form.color}
             mode="outlined"
-            onChangeText={(color) => setForm((current) => ({ ...current, color }))}
+            onChangeText={(color) => setForm((current) => ({ ...current, color: sanitizeText(color) }))}
             style={styles.input}
           />
 
@@ -228,6 +252,9 @@ export default function VehiclesScreen() {
             />
           </View>
         </Modal>
+        <Snackbar visible={Boolean(snackMessage)} onDismiss={() => setSnackMessage("")} duration={2200}>
+          {snackMessage}
+        </Snackbar>
       </Portal>
     </ScreenContainer>
   );

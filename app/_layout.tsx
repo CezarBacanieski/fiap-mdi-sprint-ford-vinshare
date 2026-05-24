@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
@@ -13,6 +13,7 @@ import AppErrorBoundary from "../components/ui/AppErrorBoundary";
 import { colors, paperTheme, spacing, typography } from "../constants/theme";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 import { requestNotificationPermissions } from "../services/notifications";
+import { enableRuntimeHardening } from "../services/runtimeHardening";
 import { seedInitialData } from "../services/storage";
 
 void SplashScreen.preventAutoHideAsync();
@@ -41,38 +42,24 @@ function RootNavigation() {
     ...Ionicons.font,
     ...MaterialCommunityIcons.font,
   });
-  const { isLoading, isOnboarded } = useAuth();
-  const router = useRouter();
-  const segments = useSegments();
+  const { isLoading, isOnboarded, isAuthenticated, refreshAuthSession } = useAuth();
 
   useEffect(() => {
     const prepare = async () => {
-      await seedInitialData();
+      await Promise.all([seedInitialData(), refreshAuthSession(), enableRuntimeHardening()]);
       void requestNotificationPermissions();
       setSeeded(true);
     };
 
     void prepare();
-  }, []);
+  }, [refreshAuthSession]);
 
   const ready = fontsLoaded && seeded && !isLoading;
 
   useEffect(() => {
     if (!ready) return;
-
-    const firstSegment = segments[0];
-    const isInOnboarding = firstSegment === "onboarding";
-
-    if (!isOnboarded && !isInOnboarding) {
-      router.replace("/onboarding");
-    }
-
-    if (isOnboarded && isInOnboarding) {
-      router.replace("/(tabs)");
-    }
-
     void SplashScreen.hideAsync();
-  }, [isOnboarded, ready, router, segments]);
+  }, [ready]);
 
   if (!ready) {
     return (
@@ -87,11 +74,20 @@ function RootNavigation() {
     <>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false, contentStyle: styles.stack }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="onboarding/index" />
-        <Stack.Screen name="vehicle/[id]" />
-        <Stack.Screen name="service/new" />
-        <Stack.Screen name="service/[id]" />
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="sign-in" />
+        </Stack.Protected>
+
+        <Stack.Protected guard={isAuthenticated && !isOnboarded}>
+          <Stack.Screen name="onboarding/index" />
+        </Stack.Protected>
+
+        <Stack.Protected guard={isAuthenticated && isOnboarded}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="vehicle/[id]" />
+          <Stack.Screen name="service/new" />
+          <Stack.Screen name="service/[id]" />
+        </Stack.Protected>
       </Stack>
     </>
   );

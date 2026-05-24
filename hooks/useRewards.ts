@@ -6,7 +6,13 @@ import {
   saveRewardTransactions,
   saveUser,
 } from "../services/storage";
+import { AppSecurityError } from "../security/errors";
+import { auditLog } from "../security/logger";
+import { actionRateLimiter } from "../security/rateLimiter";
+import { sanitizeText } from "../security/sanitization";
+import { validateUserProfileInput } from "../security/validation";
 import { Reward, RewardTransaction, TierDefinition, User, UserTier } from "../types";
+import { useAuth } from "./useAuth";
 
 interface UseRewardsResult {
   user: User | null;
@@ -38,6 +44,7 @@ export const useRewards = (): UseRewardsResult => {
   const [user, setUser] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<RewardTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { hasPermission, session } = useAuth();
 
   const reloadRewards = useCallback(async () => {
     setIsLoading(true);
@@ -77,17 +84,42 @@ export const useRewards = (): UseRewardsResult => {
 
   const updateUser = useCallback(
     async (nextUser: User) => {
+      if (!hasPermission("profile:update")) {
+        throw new AppSecurityError("Profile update denied", {
+          code: "FORBIDDEN",
+          status: 403,
+          publicMessage: "Seu perfil não pode editar dados pessoais.",
+        });
+      }
+
+      const limiter = actionRateLimiter.consume(`profile-update:${session?.userId ?? "guest"}`);
+      if (!limiter.allowed) {
+        throw new AppSecurityError("Profile update rate limited", {
+          code: "RATE_LIMITED",
+          status: 429,
+          publicMessage: "Muitas atualizações em sequência. Aguarde alguns segundos.",
+        });
+      }
+
+      const safeUser = validateUserProfileInput(nextUser);
       await persistUser({
-        ...nextUser,
-        tier: getTierName(nextUser.points),
+        ...safeUser,
+        tier: getTierName(safeUser.points),
+      });
+      auditLog({
+        event: "profile_updated",
+        severity: "info",
+        userId: session?.userId,
+        role: session?.role,
       });
     },
-    [persistUser],
+    [hasPermission, persistUser, session?.role, session?.userId],
   );
 
   const addPoints = useCallback(
     async (points: number, reason: string) => {
       if (!user) return;
+      const sanitizedReason = sanitizeText(reason).slice(0, 80);
       const nextUser: User = {
         ...user,
         points: user.points + points,
@@ -96,15 +128,22 @@ export const useRewards = (): UseRewardsResult => {
       const transaction: RewardTransaction = {
         id: `rt-${Date.now()}`,
         date: new Date().toISOString().slice(0, 10),
-        description: reason,
+        description: sanitizedReason,
         points,
         type: "earn",
       };
       const nextTransactions = [transaction, ...transactions];
       setTransactions(nextTransactions);
       await Promise.all([saveRewardTransactions(nextTransactions), persistUser(nextUser)]);
+      auditLog({
+        event: "points_earned",
+        severity: "info",
+        userId: session?.userId,
+        role: session?.role,
+        metadata: { points, reason: sanitizedReason },
+      });
     },
-    [persistUser, transactions, user],
+    [persistUser, session?.role, session?.userId, transactions, user],
   );
 
   const redeemReward = useCallback(
@@ -127,9 +166,16 @@ export const useRewards = (): UseRewardsResult => {
       const nextTransactions = [transaction, ...transactions];
       setTransactions(nextTransactions);
       await Promise.all([saveRewardTransactions(nextTransactions), persistUser(nextUser)]);
+      auditLog({
+        event: "reward_redeemed",
+        severity: "warning",
+        userId: session?.userId,
+        role: session?.role,
+        metadata: { rewardId: reward.id, points: reward.pointsNeeded },
+      });
       return true;
     },
-    [persistUser, transactions, user],
+    [persistUser, session?.role, session?.userId, transactions, user],
   );
 
   return {

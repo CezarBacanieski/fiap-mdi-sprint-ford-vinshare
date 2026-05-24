@@ -2,7 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchDealerships } from "../services/api";
 import { loadServices, loadVehicles, saveServices } from "../services/storage";
+import { AppSecurityError } from "../security/errors";
+import { auditLog } from "../security/logger";
+import { actionRateLimiter } from "../security/rateLimiter";
+import { validateServiceInput } from "../security/validation";
 import { Dealership, NewServiceInput, ServiceRecord } from "../types";
+import { useAuth } from "./useAuth";
 
 interface UseServicesResult {
   services: ServiceRecord[];
@@ -20,6 +25,7 @@ export const useServices = (): UseServicesResult => {
   const [services, setServices] = useState<ServiceRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { hasPermission, session } = useAuth();
 
   const reloadServices = useCallback(async () => {
     setIsLoading(true);
@@ -52,23 +58,41 @@ export const useServices = (): UseServicesResult => {
 
   const addService = useCallback(
     async (input: NewServiceInput) => {
+      if (!hasPermission("service:create")) {
+        throw new AppSecurityError("Service create denied", {
+          code: "FORBIDDEN",
+          status: 403,
+          publicMessage: "Seu perfil não pode criar agendamentos.",
+        });
+      }
+
+      const limiter = actionRateLimiter.consume(`service-create:${session?.userId ?? "guest"}`);
+      if (!limiter.allowed) {
+        throw new AppSecurityError("Service create rate limited", {
+          code: "RATE_LIMITED",
+          status: 429,
+          publicMessage: "Muitas tentativas de agendamento. Aguarde e tente novamente.",
+        });
+      }
+
+      const safeInput = validateServiceInput(input);
       const [vehicles, dealerships] = await Promise.all([loadVehicles(), fetchDealerships()]);
-      const vehicle = vehicles.find((item) => item.id === input.vehicleId);
-      const dealership = dealerships.find((item) => item.id === input.dealershipId);
+      const vehicle = vehicles.find((item) => item.id === safeInput.vehicleId);
+      const dealership = dealerships.find((item) => item.id === safeInput.dealershipId);
       const service: ServiceRecord = {
         id: `s-${Date.now()}`,
-        vehicleId: input.vehicleId,
+        vehicleId: safeInput.vehicleId,
         vehicleName: vehicle?.model ?? "Ford",
-        type: input.serviceTypes.join(", "),
-        date: input.date,
-        time: input.time,
-        dealershipId: input.dealershipId,
+        type: safeInput.serviceTypes.join(", "),
+        date: safeInput.date,
+        time: safeInput.time,
+        dealershipId: safeInput.dealershipId,
         dealershipName: dealership?.name ?? "Concessionaria Ford",
-        mileage: input.mileage,
+        mileage: safeInput.mileage,
         status: "Agendado",
-        notes: input.notes,
+        notes: safeInput.notes,
         details: [
-          { label: "Servico", value: input.serviceTypes.join(", ") },
+          { label: "Servico", value: safeInput.serviceTypes.join(", ") },
           { label: "Canal", value: "Agendado pelo Ford+" },
           { label: "Previsao", value: "Confirmacao em ate 2 horas uteis" },
         ],
@@ -76,9 +100,16 @@ export const useServices = (): UseServicesResult => {
       const nextServices = [service, ...services];
       setServices(nextServices);
       await saveServices(nextServices);
+      auditLog({
+        event: "service_created",
+        severity: "info",
+        userId: session?.userId,
+        role: session?.role,
+        metadata: { serviceId: service.id, dealershipId: service.dealershipId },
+      });
       return service;
     },
-    [services],
+    [hasPermission, services, session?.role, session?.userId],
   );
 
   return {

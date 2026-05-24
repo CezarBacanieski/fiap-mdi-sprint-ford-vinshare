@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, PropsWithChildren } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { colors, spacing, typography } from "../../constants/theme";
+import { securityLog } from "../../security/logger";
 
 interface AppErrorBoundaryState {
   hasError: boolean;
@@ -13,7 +14,8 @@ export default class AppErrorBoundary extends Component<PropsWithChildren, AppEr
     return { hasError: true };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
+    securityLog("error", "ui_unhandled_exception", { message: error.message });
     this.setState({ hasError: true });
   }
 
