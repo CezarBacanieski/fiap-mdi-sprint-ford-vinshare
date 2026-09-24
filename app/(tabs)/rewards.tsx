@@ -1,7 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, {
   runOnJS,
@@ -53,12 +54,19 @@ export default function RewardsScreen() {
     pointsToNextTier,
     tierProgress,
     isLoading,
+    reloadRewards,
     redeemReward,
     addPoints,
   } = useRewards();
   const rewards = useRewardCatalog();
   const { sendPointsEarnedNotification } = useNotifications();
   const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      void reloadRewards();
+    }, [reloadRewards]),
+  );
 
   const handleRedeem = async (reward: Reward) => {
     const redeemed = await redeemReward(reward);

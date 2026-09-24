@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { FAB, HelperText, Menu, Modal, Portal, TextInput } from "react-native-paper";
 import ScreenContainer from "../../components/ui/ScreenContainer";
 import SkeletonBox from "../../components/ui/SkeletonBox";
@@ -26,7 +26,7 @@ const initialForm: NewVehicleInput = {
 };
 
 export default function VehiclesScreen() {
-  const { vehicles, isLoading, errorMessage, addVehicle, deleteVehicle } = useVehicles();
+  const { vehicles, isLoading, errorMessage, addVehicle, deleteVehicle, reloadVehicles } = useVehicles();
   const [modalVisible, setModalVisible] = useState(false);
   const [modelMenuVisible, setModelMenuVisible] = useState(false);
   const [form, setForm] = useState<NewVehicleInput>(initialForm);
@@ -41,6 +41,23 @@ export default function VehiclesScreen() {
     setModalVisible(false);
     setModelMenuVisible(false);
     setForm(initialForm);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      void reloadVehicles();
+    }, [reloadVehicles]),
+  );
+
+  const confirmDeleteVehicle = (vehicleId: string, model: string) => {
+    Alert.alert(
+      "Excluir veiculo?",
+      `${model} sera removido da sua garagem local. Esta acao nao pode ser desfeita.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => void deleteVehicle(vehicleId) },
+      ],
+    );
   };
 
   const saveVehicle = async () => {
@@ -83,7 +100,7 @@ export default function VehiclesScreen() {
             <VehicleCard
               vehicle={item}
               onPress={() => router.push(`/vehicle/${item.id}`)}
-              onDelete={() => deleteVehicle(item.id)}
+              onDelete={() => confirmDeleteVehicle(item.id, item.model)}
             />
           )}
           ListEmptyComponent={

@@ -49,7 +49,7 @@ export default function NewServiceScreen() {
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [cepHint, setCepHint] = useState<string | null>(null);
-  const { vehicles } = useVehicles();
+  const { vehicles, isLoading: vehiclesLoading } = useVehicles();
   const { addService } = useServices();
   const { scheduleServiceReminder } = useNotifications();
   const { data: dealerships = [], isLoading: dealershipsLoading } = useDealerships();
@@ -80,6 +80,24 @@ export default function NewServiceScreen() {
       return target.includes(term);
     });
   }, [dealershipSearch, dealerships]);
+
+  if (!vehiclesLoading && vehicles.length === 0) {
+    return (
+      <ScreenContainer contentStyle={styles.emptyContainer}>
+        <MaterialCommunityIcons name="car-off" size={52} color={colors.textMuted} />
+        <Text style={styles.emptyTitle}>Cadastre um veiculo primeiro</Text>
+        <Text style={styles.emptyText}>
+          Um veiculo conectado e necessario para criar um agendamento na rede Ford.
+        </Text>
+        <ThemedButton
+          title="Ir para meus veiculos"
+          icon="car-plus"
+          onPress={() => router.replace("/(tabs)/vehicles")}
+          style={styles.emptyButton}
+        />
+      </ScreenContainer>
+    );
+  }
 
   const toggleServiceType = (type: string) => {
     setServiceTypes((current) =>
@@ -343,6 +361,26 @@ export default function NewServiceScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingBottom: spacing.xxl,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.xl,
+  },
+  emptyTitle: {
+    ...typography.header,
+    color: colors.textPrimary,
+    marginTop: spacing.lg,
+    textAlign: "center",
+  },
+  emptyText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+    textAlign: "center",
+  },
+  emptyButton: {
+    marginTop: spacing.xl,
   },
   topBar: {
     alignItems: "center",

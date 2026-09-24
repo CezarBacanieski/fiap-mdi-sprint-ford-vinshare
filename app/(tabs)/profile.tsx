@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Divider, Switch, TextInput } from "react-native-paper";
 import ScreenContainer from "../../components/ui/ScreenContainer";
@@ -18,13 +18,19 @@ import { storageKeys } from "../../services/storage";
 import { User } from "../../types";
 
 export default function ProfileScreen() {
-  const { user, currentTier, updateUser, isLoading } = useRewards();
-  const { vehicles } = useVehicles();
+  const { user, currentTier, updateUser, isLoading, reloadRewards } = useRewards();
+  const { vehicles, reloadVehicles } = useVehicles();
   const { resetOnboarding } = useAuth();
   const [editing, setEditing] = useState(false);
   const [draftUser, setDraftUser] = useState<User | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [reviewRemindersEnabled, setReviewRemindersEnabled] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([reloadRewards(), reloadVehicles()]);
+    }, [reloadRewards, reloadVehicles]),
+  );
 
   useEffect(() => {
     if (user) setDraftUser(user);

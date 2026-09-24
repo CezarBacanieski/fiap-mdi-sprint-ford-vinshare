@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, PropsWithChildren } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { colors, spacing, typography } from "../../constants/theme";
+import ThemedButton from "./ThemedButton";
 
 interface AppErrorBoundaryState {
   hasError: boolean;
@@ -25,6 +26,11 @@ export default class AppErrorBoundary extends Component<PropsWithChildren, AppEr
           <Text style={styles.body}>
             Feche e abra o Ford+ novamente. Seus dados locais continuam salvos.
           </Text>
+          <ThemedButton
+            title="Tentar novamente"
+            onPress={() => this.setState({ hasError: false })}
+            style={styles.retry}
+          />
         </View>
       );
     }
@@ -51,5 +57,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: spacing.md,
     textAlign: "center",
+  },
+  retry: {
+    marginTop: spacing.xl,
   },
 });

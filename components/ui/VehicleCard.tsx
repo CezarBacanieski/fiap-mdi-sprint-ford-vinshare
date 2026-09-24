@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { colors, gradients, spacing, typography } from "../../constants/theme";
 import { Vehicle } from "../../types";
@@ -18,8 +18,15 @@ interface VehicleCardProps {
 function DeleteAction({ onDelete }: { onDelete: () => void }) {
   return (
     <View style={styles.deleteAction}>
-      <MaterialCommunityIcons name="trash-can-outline" size={26} color={colors.white} onPress={onDelete} />
-      <Text style={styles.deleteLabel}>Excluir</Text>
+      <Pressable
+        accessibilityLabel="Excluir veiculo"
+        accessibilityRole="button"
+        onPress={onDelete}
+        style={styles.deleteButton}
+      >
+        <MaterialCommunityIcons name="trash-can-outline" size={26} color={colors.white} />
+        <Text style={styles.deleteLabel}>Excluir</Text>
+      </Pressable>
     </View>
   );
 }
@@ -136,6 +143,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginLeft: spacing.sm,
     width: 82,
+  },
+  deleteButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 82,
+    width: "100%",
   },
   deleteLabel: {
     color: colors.white,

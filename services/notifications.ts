@@ -1,7 +1,9 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { addHours, differenceInMilliseconds, parseISO, subHours } from "date-fns";
 import { Platform } from "react-native";
+import { storageKeys } from "./storage";
 import { ServiceRecord } from "../types";
 
 type NotificationsModule = typeof import("expo-notifications");
@@ -26,7 +28,8 @@ const loadNotificationsModule = async (): Promise<NotificationsModule | null> =>
   }
 
   if (!notificationsModulePromise) {
-    notificationsModulePromise = import("expo-notifications")
+    notificationsModulePromise = Promise.resolve()
+      .then(() => require("expo-notifications") as NotificationsModule)
       .then((module) => {
         if (!notificationHandlerConfigured) {
           module.setNotificationHandler({
@@ -100,8 +103,17 @@ export const scheduleServiceReminder = async (service: ServiceRecord): Promise<s
   const reminderDate = getReminderDate(service);
   if (!reminderDate || isExpoGoAndroid()) return null;
 
+  const [notificationsEnabled, remindersEnabled] = await Promise.all([
+    AsyncStorage.getItem(storageKeys.notificationsEnabled),
+    AsyncStorage.getItem(storageKeys.reviewRemindersEnabled),
+  ]);
+  if (notificationsEnabled === "false" || remindersEnabled === "false") return null;
+
   const notifications = await loadNotificationsModule();
   if (!notifications) return null;
+
+  const permissions = await notifications.getPermissionsAsync();
+  if (!permissions.granted) return null;
 
   return notifications.scheduleNotificationAsync({
     content: {
@@ -123,8 +135,14 @@ export const sendPointsEarnedNotification = async (
 ): Promise<string | null> => {
   if (isExpoGoAndroid()) return null;
 
+  const notificationsEnabled = await AsyncStorage.getItem(storageKeys.notificationsEnabled);
+  if (notificationsEnabled === "false") return null;
+
   const notifications = await loadNotificationsModule();
   if (!notifications) return null;
+
+  const permissions = await notifications.getPermissionsAsync();
+  if (!permissions.granted) return null;
 
   return notifications.scheduleNotificationAsync({
     content: {

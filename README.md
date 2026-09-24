@@ -1,317 +1,176 @@
-<div align="center">
-
 # Ford+
 
-### Seu Ford, sempre em dia.
+Aplicativo mobile da FIAP para o **Desafio 02 — Boosting VIN Share in South America with Intelligent Solutions**, em parceria com a Ford. O Ford+ incentiva o retorno à rede oficial ao reunir informações do veículo, manutenção preventiva, agendamento de serviços e benefícios de fidelidade em uma experiência local e demonstrável.
 
-Aplicativo mobile desenvolvido para fortalecer o relacionamento entre clientes Ford e a rede oficial de concessionárias, aumentando retenção, recorrência de serviços e engajamento no pós-venda.
+## Funcionalidades disponíveis
 
-<br/>
+- Onboarding persistido localmente e encerramento de sessão para repetir a demonstração.
+- Dashboard com veículo principal, Vehicle Health Score, manutenção recomendada, próximo serviço e histórico recente.
+- Garagem de veículos: listagem, cadastro local, detalhe técnico, saúde por sistema e exclusão confirmada.
+- Serviços: histórico, agendamentos futuros, detalhe de agendamento e novo agendamento em três etapas.
+- Concessionárias simuladas com busca; consulta de CEP via ViaCEP ao selecionar uma unidade.
+- Consulta de modelos Ford via FIPE durante o cadastro do veículo.
+- Ford+ Rewards: saldo, níveis, transações, ganho de pontos e resgate local de benefícios.
+- Perfil editável com persistência em AsyncStorage e preferências de notificações e lembretes.
+- Notificações locais em builds de desenvolvimento/produção quando o dispositivo concede permissão.
 
-![React Native](https://img.shields.io/badge/React%20Native-0.86-61DAFB?style=for-the-badge&logo=react)
-![Expo](https://img.shields.io/badge/Expo-SDK%2057-000020?style=for-the-badge&logo=expo)
-![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+Os dados de veículos, serviços, rewards e perfil são exemplos locais inicializados no primeiro uso. Não há integração com APIs Ford nem backend de produção.
 
-</div>
+## Stack
 
----
+- Expo SDK 57, React Native 0.86 e TypeScript estrito.
+- Expo Router para navegação por arquivos.
+- React Native Paper, Expo Vector Icons, Reanimated e SVG para a interface.
+- TanStack React Query para consultas FIPE e concessionárias.
+- AsyncStorage para persistência local.
+- Axios, date-fns, ViaCEP e API FIPE.
 
-# 📖 Sobre o Projeto
+## Arquitetura
 
-O **Ford+** é uma solução mobile desenvolvida para o **Challenge 02 da FIAP em parceria com a Ford Brasil**, dentro do tema:
-
-> **Boosting VIN Share in South America with Intelligent Solutions**
-
-O conceito de **VIN Share** representa a porcentagem de veículos Ford que retornam à rede oficial de concessionárias para manutenção e serviços de pós-venda.
-
-O objetivo do Ford+ é aumentar essa retenção por meio de uma experiência digital moderna, centralizada e recorrente, conectando o cliente à Ford durante toda a jornada de propriedade do veículo.
-
-O aplicativo transforma o pós-venda em uma experiência contínua, oferecendo:
-
-- acompanhamento da saúde do veículo;
-- histórico de manutenção;
-- agendamento inteligente;
-- notificações preventivas;
-- programa de fidelidade;
-- benefícios exclusivos.
-
-A proposta foi desenhada para aproximar a Ford do momento real de uso do cliente, incentivando o retorno à rede autorizada de maneira prática e estratégica.
-
----
-
-# ✨ Principais Funcionalidades
-
-## 🚗 Gestão do Veículo
-
-- Dashboard premium com informações do veículo principal;
-- Vehicle Health Score (pontuação de saúde do veículo);
-- Controle de quilometragem;
-- Breakdown de sistemas:
-  - motor;
-  - freios;
-  - pneus;
-  - suspensão;
-  - ar-condicionado;
-  - fluidos.
-
-## 🔔 Experiência Inteligente
-
-- Alertas de manutenção preventiva;
-- Notificações locais com Expo Notifications;
-- Lembretes de revisão;
-- Avisos de benefícios e recompensas.
-
-## 📅 Pós-venda e Serviços
-
-- Histórico completo de serviços realizados;
-- Agendamento em múltiplas etapas;
-- Seleção de:
-  - veículo;
-  - serviço;
-  - concessionária;
-  - data;
-  - horário.
-
-## 🏆 Fidelização
-
-- Sistema Ford+ Rewards;
-- Acúmulo de pontos;
-- Níveis de fidelidade;
-- Histórico de recompensas;
-- Resgate de benefícios exclusivos.
-
-## 🏢 Rede de Concessionárias
-
-- Lista de concessionárias Ford;
-- Distância e avaliação;
-- Horários de funcionamento;
-- Estrutura preparada para geolocalização futura.
-
----
-
-# 🛠️ Stack Tecnológica
-
-| Tecnologia | Objetivo |
-|---|---|
-| React Native | Desenvolvimento mobile cross-platform |
-| Expo | Ecossistema e ferramentas de desenvolvimento |
-| TypeScript | Tipagem estática e escalabilidade |
-| Expo Router | Navegação baseada em arquivos |
-| React Query | Gerenciamento de cache e requisições |
-| AsyncStorage | Persistência local de dados |
-| FIPE API | Consulta de modelos Ford |
-| ViaCEP | Estrutura de consulta de endereços |
-
----
-
-# 🏗️ Arquitetura do Projeto
-
-O projeto foi estruturado com foco em:
-
-- escalabilidade;
-- reutilização de componentes;
-- separação de responsabilidades;
-- facilidade de manutenção.
-
-## Estrutura principal
-
-```bash
+```text
 app/
- ├── (tabs)/
- ├── vehicle/[id]
- ├── service/*
+  (tabs)/              # Dashboard, veículos, serviços, rewards e perfil
+  onboarding/          # Fluxo inicial
+  vehicle/[id].tsx     # Detalhe de veículo
+  service/new.tsx      # Novo agendamento
+  service/[id].tsx     # Detalhe de agendamento
 components/
- ├── ui/
- ├── charts/
-hooks/
-services/
-storage/
-````
-
-## Decisões Técnicas
-
-### React Native + Expo
-
-Permite entregar uma experiência consistente para iOS e Android utilizando uma única base de código.
-
-### Expo Router
-
-Organiza a navegação através de rotas baseadas em arquivos, facilitando manutenção e escalabilidade.
-
-### React Query
-
-Centraliza:
-
-* cache;
-* loading;
-* sincronização;
-* tratamento de erros das APIs externas.
-
-### AsyncStorage
-
-Viabiliza persistência local para o MVP sem necessidade de backend dedicado.
-
----
-
-# 🔌 Integrações Externas
-
-## FIPE API
-
-Consulta de modelos Ford reais:
-
-```http
-GET /carros/marcas/26/modelos
+  ui/                  # Componentes visuais reutilizáveis
+  charts/              # Gráficos de saúde e fidelidade
+hooks/                 # Estado e operações de domínio
+services/              # Storage, notificações e integrações HTTP
+constants/             # Tema e dados de demonstração
+types/                 # Tipos do domínio
+docs/screenshots/      # Evidências da versão final (captura manual)
 ```
 
-## ViaCEP
+## Como executar
 
-Estrutura de enriquecimento de endereços via CEP.
-
-## Expo Notifications
-
-Sistema de notificações locais para:
-
-* lembretes de manutenção;
-* alertas;
-* recompensas.
-
----
-
-# 📱 Demonstração
-
-## 🎥 Vídeo Demonstrativo
-
-Veja o Ford+ em funcionamento:
-
-<a href="https://youtube.com/shorts/XM4Dn7UZGRs?feature=share">
-  <img src="https://img.youtube.com/vi/XM4Dn7UZGRs/hqdefault.jpg" width="420" alt="Vídeo demonstrativo do Ford+">
-</a>
-
-<br/>
-
-👉 [Assistir demonstração completa](https://youtube.com/shorts/XM4Dn7UZGRs?feature=share)
-
----
-
-## 🎥 Vídeo Explicativo
-
-Explicando o Ford+ :
-
-<a href="https://youtu.be/nqJf0cdi8Ds?si=pIM6Dl0LUz8Nr8xH">
-  <img src="https://img.youtube.com/vi/nqJf0cdi8Ds/hqdefault.jpg" width="420" alt="Vídeo demonstrativo do Ford+">
-</a>
-
-<br/>
-
-👉 [Assistir demonstração completa](https://youtu.be/nqJf0cdi8Ds?si=pIM6Dl0LUz8Nr8xH)
-
-# 🖼️ Screenshots do Aplicativo
-
-<div align="center">
-
-| Home                                                                                | Serviços                                                                    | Perfil                                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203529.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203618.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203719.png" width="220"> |
-
-| Meus Veículos                                                                         | Pontos                                                                           | Agendamento                                                                     |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203555.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203653.png" width="220"> | <img src="assets/prints/Captura%20de%20tela%202026-05-20%20203756.png" width="220"> |
-
-</div>
-
----
-
-# 🚀 Como Executar o Projeto
-
-## Pré-requisitos
-
-* Node.js LTS
-* npm
-* Expo Go ou emulador Android/iOS
-
-## Instalação
+Pré-requisitos: Node.js LTS e npm.
 
 ```bash
-# Clone o repositório
-git clone <url-do-repositorio>
-
-# Acesse a pasta
-cd fiap-mdi-sprint-ford-vinshare
-
-# Instale as dependências
 npm install
-
-# Inicie o projeto
+npm run doctor
+npm run typecheck
 npx expo start
 ```
 
-Depois disso:
+Para abrir no Android conectado/emulado:
 
-* escaneie o QR Code com o Expo Go;
-* ou pressione:
-
-  * `a` para Android;
-  * `i` para iOS.
-
----
-
-# 🎯 Objetivo Estratégico
-
-O Ford+ foi concebido para atuar diretamente nos principais fatores que impactam o VIN Share:
-
-* aumento da recorrência de manutenção;
-* fortalecimento do relacionamento pós-venda;
-* fidelização do cliente;
-* incentivo ao retorno à rede oficial;
-* criação de recorrência digital.
-
-A proposta combina:
-
-* experiência do usuário;
-* estratégia de negócio;
-* retenção;
-* tecnologia mobile;
-* gamificação.
-
----
-
-# 🔮 Próximos Passos
-
-* Backend com Node.js + PostgreSQL;
-* Integração real com APIs Ford;
-* Push Notifications via FCM/APNs;
-* Autenticação biométrica;
-* Geolocalização em tempo real;
-* Mapa de concessionárias próximas;
-* Sistema de diagnósticos inteligentes;
-* Inspeção assistida com realidade aumentada (AR).
-
----
-
-# 👥 Integrantes
-
-| Nome                    | RM        |
-| ----------------------- | --------- |
-| Milton Cezar Bacanieski | RM 555206 |
-| Victório Bastelli       | RM 554723 |
-| Lorenzo Mangini         | RM 554901 |
-| Vitor Bebiano           | RM 555026 |
-
----
-
-# 📩 Contato
-
-**Professor responsável:**
-[profhercules.ramos@fiap.com.br](mailto:profhercules.ramos@fiap.com.br)
-
----
-
-<div align="center">
-
-### Ford+ • FIAP x Ford Brasil Challenge 2026
-
-Tecnologia, experiência e fidelização no pós-venda automotivo.
-
-</div>
+```bash
+npm run android
 ```
+
+O Expo Go é adequado para a maior parte da demonstração. Por restrições da plataforma, as notificações locais Android devem ser validadas em development build ou APK instalado.
+
+## Build Android (APK)
+
+O arquivo `eas.json` contém o perfil `preview`, configurado para gerar um APK instalável, e o identificador Android é `br.com.fiap.fordplus`.
+
+```bash
+npx eas-cli login
+npm run build:android:apk
+```
+
+Ao final, o EAS exibirá um link para baixar o APK. Transfira-o ao aparelho e permita a instalação de apps da fonte usada para o download quando o Android solicitar. O perfil `production` gera AAB para publicação em loja.
+
+### APK Sprint 3
+
+- Arquivo/release: adicionar após o EAS Build.
+- Link de download: adicionar após o EAS Build.
+- Instalação: baixar o APK no Android, abrir o arquivo e confirmar a instalação.
+
+## Testes e validações locais
+
+```bash
+npm run typecheck
+npm test
+npm run doctor
+npx expo export --platform android
+```
+
+O último comando valida a criação do bundle Android; ele não gera um APK instalável. O APK é produzido pelo comando EAS acima.
+
+## Validação da Sprint 3
+
+### Testes automatizados
+
+- 28 testes automatizados em 8 arquivos de teste.
+- 28/28 aprovados.
+- TypeScript aprovado.
+- Expo Doctor: 21/21 verificações aprovadas.
+
+Cobertura funcional:
+
+- persistência e AsyncStorage;
+- veículos, confirmação de exclusão e atualização ao retornar o foco;
+- serviços, validações e agendamentos;
+- rewards e perfil;
+- onboarding e logout;
+- FIPE e ViaCEP;
+- notificações e preferências de lembretes;
+- Error Boundary e ação de tentar novamente.
+
+### Validação do build
+
+- `npm run typecheck` ✅
+- `npm run doctor` ✅
+- `npm test` ✅
+- `npx expo export --platform android` ✅
+- EAS Build APK: [em fila](https://expo.dev/accounts/vitorbmulford/projects/ford-plus-vinshare/builds/21da9131-7ae3-460f-82ca-1125251d2a5d)
+- Instalação e smoke test Android: pendentes da conclusão da build.
+
+### Testes automatizados
+
+A suíte Jest usa `jest-expo` e Testing Library com mocks para AsyncStorage, Expo Notifications, Expo Router, FIPE e ViaCEP. Ela cobre persistência, hooks de domínio, onboarding/logout, veículos, agendamento, rewards, perfil, preferências de notificação, Error Boundary e o recarregamento da aba de veículos ao receber foco.
+
+```bash
+npm test
+# desenvolvimento
+npm run test:watch
+```
+
+### Smoke test pós-instalação
+
+- [ ] O app inicia e o onboarding abre no primeiro uso.
+- [ ] Concluir onboarding abre o dashboard.
+- [ ] Abrir e consultar os detalhes de cada veículo.
+- [ ] Cadastrar um veículo e confirmar que a garagem e dashboard refletem a alteração.
+- [ ] Excluir um veículo e confirmar que a confirmação é exibida.
+- [ ] Criar um agendamento escolhendo veículo, serviço, concessionária, data e horário.
+- [ ] Confirmar que o novo agendamento aparece em Serviços.
+- [ ] Abrir o detalhe de um agendamento futuro.
+- [ ] Ganhar pontos e resgatar um benefício em Rewards.
+- [ ] Editar dados do perfil, sair e reiniciar o onboarding.
+- [ ] Validar a permissão e um lembrete local no APK/development build.
+
+## Screenshots para a entrega
+
+As imagens antigas em `assets/prints/` não são a evidência da versão final e não devem ser usadas no relatório da Sprint 3. Após instalar o APK, capture manualmente e salve as imagens atuais em `docs/screenshots/`:
+
+1. `01-onboarding.png` — primeira tela do onboarding.
+2. `02-dashboard.png` — dashboard com Health Score e alerta de serviço.
+3. `03-veiculos.png` — garagem de veículos.
+4. `04-detalhe-veiculo.png` — saúde por sistema e linha do tempo.
+5. `05-servicos.png` — lista de próximos serviços.
+6. `06-novo-agendamento-etapa-1.png` — veículo e tipo de serviço.
+7. `07-novo-agendamento-etapa-2.png` — concessionária, data e horário.
+8. `08-confirmacao-agendamento.png` — resumo/feedback após confirmar.
+9. `09-rewards.png` — saldo, nível e benefícios.
+10. `10-perfil.png` — perfil e configurações.
+
+## Limitações atuais
+
+- Dados de negócio e concessionárias são mocks persistidos localmente.
+- FIPE e ViaCEP dependem de conexão; o fluxo principal permanece demonstrável com os dados já existentes.
+- Não há login remoto, APIs Ford, mapa/geolocalização em tempo real, push remoto ou backend.
+- A geração do APK depende de conta EAS autenticada e é realizada fora do repositório.
+
+## Integrantes
+
+| Nome | RM |
+| --- | --- |
+| Milton Cezar Bacanieski | 555206 |
+| Victório Bastelli | 554723 |
+| Lorenzo Mangini | 554901 |
+| Vitor Bebiano | 555026 |

@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { router } from "expo-router";
-import { ReactNode, useEffect } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { ReactNode, useCallback, useEffect } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -81,9 +81,9 @@ const getAlertTone = (service: ServiceRecord | undefined) => {
 };
 
 export default function HomeScreen() {
-  const { user, isLoading: rewardsLoading } = useRewards();
-  const { vehicles, isLoading: vehiclesLoading, errorMessage } = useVehicles();
-  const { upcomingServices, historyServices, isLoading: servicesLoading } = useServices();
+  const { user, isLoading: rewardsLoading, reloadRewards } = useRewards();
+  const { vehicles, isLoading: vehiclesLoading, errorMessage, reloadVehicles } = useVehicles();
+  const { upcomingServices, historyServices, isLoading: servicesLoading, reloadServices } = useServices();
   const { notificationCount, clearNotificationCount } = useNotifications();
   const isLoading = rewardsLoading || vehiclesLoading || servicesLoading;
   const primaryVehicle = vehicles[0];
@@ -92,6 +92,12 @@ export default function HomeScreen() {
   const recommendations = primaryVehicle
     ? maintenanceRecommendations.filter((item) => item.vehicleId === primaryVehicle.id)
     : maintenanceRecommendations.slice(0, 3);
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([reloadRewards(), reloadVehicles(), reloadServices()]);
+    }, [reloadRewards, reloadServices, reloadVehicles]),
+  );
 
   if (isLoading) {
     return (
