@@ -8,8 +8,8 @@ Aplicativo mobile desenvolvido para fortalecer o relacionamento entre clientes F
 
 <br/>
 
-![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?style=for-the-badge&logo=react)
-![Expo](https://img.shields.io/badge/Expo-SDK%2055-000020?style=for-the-badge&logo=expo)
+![React Native](https://img.shields.io/badge/React%20Native-0.86-61DAFB?style=for-the-badge&logo=react)
+![Expo](https://img.shields.io/badge/Expo-SDK%2057-000020?style=for-the-badge&logo=expo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
