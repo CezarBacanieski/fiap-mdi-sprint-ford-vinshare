@@ -30,7 +30,7 @@ jest.mock("react-native-paper", () => {
   return { MD3DarkTheme: { colors: {} }, Searchbar: () => React.createElement(View), Snackbar: () => React.createElement(View), TextInput: () => React.createElement(View) };
 });
 
-import NewServiceScreen from "./new";
+import NewServiceScreen from "../../app/service/new";
 
 describe("new service validation", () => {
   beforeEach(() => {
