@@ -1,4 +1,4 @@
-import { encryptString } from "../../../security/cryptoStorage";
+import { encryptServerValue } from "./serverCrypto";
 import { NewVehicleInput, Vehicle } from "../../../types";
 
 interface StoredVehicle {
@@ -55,8 +55,8 @@ export const createVehicle = async (input: NewVehicleInput): Promise<Vehicle> =>
   const record: StoredVehicle = {
     id: vehicle.id,
     createdAt: new Date().toISOString(),
-    encryptedPlate: await encryptString(plate),
-    encryptedChassi: await encryptString(chassi),
+    encryptedPlate: await encryptServerValue(plate),
+    encryptedChassi: await encryptServerValue(chassi),
     payload,
   };
 

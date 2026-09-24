@@ -198,6 +198,7 @@ export const signIn = async (request: LoginRequest): Promise<AuthSession> => {
   const rateKey = `${request.requestFingerprint}:${request.email.toLowerCase()}`;
   const rate = authRateLimiter.consume(rateKey);
   if (!rate.allowed) {
+    securityLog("warn", "login_rate_limited", { key: rateKey });
     throw new AppSecurityError("Rate limit exceeded", {
       code: "RATE_LIMITED",
       status: 429,
@@ -210,6 +211,7 @@ export const signIn = async (request: LoginRequest): Promise<AuthSession> => {
   const identity = identitiesByEmail.get(request.email.toLowerCase());
   if (!identity) {
     registerAttemptFailure(rateKey);
+    securityLog("warn", "login_failed", { key: rateKey });
     throw new AppSecurityError("Invalid credentials", {
       code: "INVALID_CREDENTIALS",
       status: 401,
@@ -220,6 +222,7 @@ export const signIn = async (request: LoginRequest): Promise<AuthSession> => {
   const candidateHash = await derivePasswordHash(request.password, identity.email);
   if (!secureEquals(candidateHash, identity.passwordHash)) {
     registerAttemptFailure(rateKey);
+    securityLog("warn", "login_failed", { key: rateKey });
     throw new AppSecurityError("Invalid credentials", {
       code: "INVALID_CREDENTIALS",
       status: 401,
@@ -241,6 +244,7 @@ export const signIn = async (request: LoginRequest): Promise<AuthSession> => {
 
 export const refreshSession = (refreshToken: string): AuthSession => {
   if (usedRefreshTokens.has(refreshToken)) {
+    securityLog("warn", "auth_refresh_replay", {});
     throw new AppSecurityError("Refresh token replay detected", {
       code: "TOKEN_REPLAY",
       status: 401,
@@ -250,6 +254,7 @@ export const refreshSession = (refreshToken: string): AuthSession => {
 
   const sessionId = refreshToSession.get(refreshToken);
   if (!sessionId) {
+    securityLog("warn", "auth_refresh_invalid", {});
     throw new AppSecurityError("Invalid refresh token", {
       code: "INVALID_REFRESH_TOKEN",
       status: 401,
@@ -261,6 +266,7 @@ export const refreshSession = (refreshToken: string): AuthSession => {
   if (!currentSession || currentSession.refreshToken !== refreshToken || currentSession.refreshTokenExpiresAt < now()) {
     sessions.delete(sessionId);
     refreshToSession.delete(refreshToken);
+    securityLog("warn", "auth_refresh_expired", {});
     throw new AppSecurityError("Expired refresh token", {
       code: "REFRESH_TOKEN_EXPIRED",
       status: 401,

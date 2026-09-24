@@ -1,4 +1,5 @@
 import { SecurityEvent } from "./types";
+import { incrementSecurityMetric } from "./metrics";
 
 const sensitiveKeyPattern = /(password|token|authorization|cpf|email|phone|secret|cookie|chassi)/i;
 
@@ -35,6 +36,7 @@ export const createRequestId = (): string => `req_${randomHex(12)}`;
 export const createCorrelationId = (): string => `corr_${randomHex(12)}`;
 
 export const auditLog = (event: SecurityEvent): void => {
+  if (event.event.includes("login_success")) incrementSecurityMetric("login_success_total");
   const entry = {
     timestamp: new Date().toISOString(),
     type: "audit",
@@ -50,6 +52,10 @@ export const securityLog = (
   message: string,
   metadata?: Record<string, unknown>,
 ): void => {
+  incrementSecurityMetric("security_events_total");
+  if (message.includes("login") || message.includes("account_locked")) incrementSecurityMetric("login_failed_total");
+  if (message.includes("rate_limit")) incrementSecurityMetric("rate_limit_blocked_total");
+  if (message.includes("refresh") && level !== "info") incrementSecurityMetric("auth_refresh_failed_total");
   const payload = {
     timestamp: new Date().toISOString(),
     type: "security",

@@ -522,41 +522,13 @@ As telas de detalhes de veículos e serviços passaram a validar os parâmetros 
 
 ---
 
-# 6. Armazenamento local criptografado
+# 6. Armazenamento local de credenciais
 
-O commit criou `security/cryptoStorage.ts`, que implementa criptografia local usando:
+Sessão e refresh token são armazenados pelo `expo-secure-store`, que usa o Keystore no Android e o Keychain no iOS. Não há chave em `EXPO_PUBLIC_*`: valores públicos são incorporados ao bundle e não constituem segredo.
 
-- AES-GCM quando o Web Crypto está disponível.
-- Derivação de chave por SHA-256.
-- IV aleatório para cada operação de criptografia.
-- Fallback controlado para ambientes sem suporte ao Web Crypto.
+Dados do domínio do protótipo (perfil, veículos, serviços e recompensas) permanecem em AsyncStorage. Isso é uma limitação conhecida, documentada em `docs/cybersecurity/SPRINT3.md`, e deve ser substituído por uma arquitetura de dados protegida antes de uso produtivo.
 
-O armazenamento passou a criptografar dados como:
-
-- Usuário.
-- Veículos.
-- Serviços.
-- Transações de recompensas.
-- Sessão de autenticação.
-- Refresh token.
-
-Também foram criadas funções auxiliares em `services/storage.ts`:
-
-- `getJsonItem`
-- `setJsonItem`
-- `getStringItem`
-- `setStringItem`
-- `removeStorageItem`
-
-As variáveis utilizadas para configurar os segredos são:
-
-```env
-EXPO_PUBLIC_STORAGE_SECRET
-API_HMAC_SECRET
-NODE_ENV=production
-```
-
-Foi adicionado um arquivo `.env.example` com esses valores de referência, e `.env` passou a ser ignorado pelo Git.
+`API_HMAC_SECRET` é segredo exclusivo do servidor e deve ter no mínimo 32 caracteres em ambiente de execução. O arquivo `.env.example` contém apenas o nome de referência.
 
 ---
 

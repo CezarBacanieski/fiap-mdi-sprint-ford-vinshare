@@ -1,5 +1,6 @@
 import { AppSecurityError } from "../../security/errors";
 import { refreshSession, revokeSession, signIn } from "../../security/auth";
+import { getSecurityMetrics } from "../../security/metrics";
 
 describe("auth security flow", () => {
   it("creates and rotates refresh token", async () => {
@@ -24,5 +25,11 @@ describe("auth security flow", () => {
     const rotated = refreshSession(session.refreshToken);
     expect(() => refreshSession(session.refreshToken)).toThrow(AppSecurityError);
     revokeSession(rotated.sessionId);
+  });
+
+  it("registers an authentication failure metric", async () => {
+    const before = getSecurityMetrics().counters.auth_refresh_failed_total;
+    expect(() => refreshSession("invalid-refresh-token")).toThrow(AppSecurityError);
+    expect(getSecurityMetrics().counters.auth_refresh_failed_total).toBe(before + 1);
   });
 });

@@ -1,4 +1,5 @@
 import { preflightResponse, withSecurity } from "../_lib/http";
+import { getSecurityMetrics } from "../../../security/metrics";
 
 export async function OPTIONS(request: Request) {
   return preflightResponse(request) ?? new Response(null, { status: 405 });
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
             "payload_signature",
             "structured_audit_logs",
           ],
+          metrics: getSecurityMetrics(),
         },
       },
       { status: 200 },

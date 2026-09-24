@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { mockRewardTransactions, mockServices, mockUser, mockVehicles } from "../constants/mockData";
-import { decryptString, encryptString } from "../security/cryptoStorage";
 import { securityLog } from "../security/logger";
 import { RewardTransaction, ServiceRecord, StorageSeed, User, Vehicle } from "../types";
 
@@ -18,11 +18,7 @@ export const storageKeys = {
   auditTail: "@fordplus/audit_tail",
 } as const;
 
-const encryptedKeys = new Set<string>([
-  storageKeys.user,
-  storageKeys.vehicles,
-  storageKeys.services,
-  storageKeys.rewards,
+const secureKeys = new Set<string>([
   storageKeys.authSession,
   storageKeys.refreshToken,
 ]);
@@ -41,32 +37,36 @@ const parseSafeJson = <T>(raw: string): T | null => {
   }
 };
 
-const encodeForStorage = async (key: string, value: string): Promise<string> => {
-  if (!encryptedKeys.has(key)) {
-    return value;
+const getStoredValue = async (key: string): Promise<string | null> =>
+  secureKeys.has(key) ? SecureStore.getItemAsync(key) : AsyncStorage.getItem(key);
+
+const setStoredValue = async (key: string, value: string): Promise<void> => {
+  if (secureKeys.has(key)) {
+    await SecureStore.setItemAsync(key, value, {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    });
+    return;
   }
-  return encryptString(value);
+  await AsyncStorage.setItem(key, value);
 };
 
-const decodeFromStorage = async (key: string, value: string): Promise<string | null> => {
-  if (!encryptedKeys.has(key)) {
-    return value;
+const removeStoredValue = async (key: string): Promise<void> => {
+  if (secureKeys.has(key)) {
+    await SecureStore.deleteItemAsync(key);
+    return;
   }
-  return decryptString(value);
+  await AsyncStorage.removeItem(key);
 };
 
 export const getJsonItem = async <T>(key: string): Promise<T | null> => {
-  const raw = await AsyncStorage.getItem(key);
+  const raw = await getStoredValue(key);
   if (!raw) return null;
-  const decoded = await decodeFromStorage(key, raw);
-  if (!decoded) return null;
-  return parseSafeJson<T>(decoded);
+  return parseSafeJson<T>(raw);
 };
 
 export const setJsonItem = async <T>(key: string, value: T): Promise<void> => {
   const raw = JSON.stringify(value);
-  const encoded = await encodeForStorage(key, raw);
-  await AsyncStorage.setItem(key, encoded);
+  await setStoredValue(key, raw);
 };
 
 export const seedInitialData = async (): Promise<void> => {
@@ -80,18 +80,11 @@ export const seedInitialData = async (): Promise<void> => {
     rewards: mockRewardTransactions,
   };
 
-  const [user, vehicles, services, rewards] = await Promise.all([
-    encodeForStorage(storageKeys.user, JSON.stringify(seed.user)),
-    encodeForStorage(storageKeys.vehicles, JSON.stringify(seed.vehicles)),
-    encodeForStorage(storageKeys.services, JSON.stringify(seed.services)),
-    encodeForStorage(storageKeys.rewards, JSON.stringify(seed.rewards)),
-  ]);
-
   await AsyncStorage.multiSet([
-    [storageKeys.user, user],
-    [storageKeys.vehicles, vehicles],
-    [storageKeys.services, services],
-    [storageKeys.rewards, rewards],
+    [storageKeys.user, JSON.stringify(seed.user)],
+    [storageKeys.vehicles, JSON.stringify(seed.vehicles)],
+    [storageKeys.services, JSON.stringify(seed.services)],
+    [storageKeys.rewards, JSON.stringify(seed.rewards)],
     [storageKeys.notificationsEnabled, "true"],
     [storageKeys.reviewRemindersEnabled, "true"],
     [storageKeys.seeded, "true"],
@@ -135,16 +128,13 @@ export const resetOnboardingFlag = async (): Promise<void> => {
 };
 
 export const getStringItem = async (key: string): Promise<string | null> => {
-  const raw = await AsyncStorage.getItem(key);
-  if (!raw) return null;
-  return decodeFromStorage(key, raw);
+  return getStoredValue(key);
 };
 
 export const setStringItem = async (key: string, value: string): Promise<void> => {
-  const encoded = await encodeForStorage(key, value);
-  await AsyncStorage.setItem(key, encoded);
+  await setStoredValue(key, value);
 };
 
 export const removeStorageItem = async (key: string): Promise<void> => {
-  await AsyncStorage.removeItem(key);
+  await removeStoredValue(key);
 };

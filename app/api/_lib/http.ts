@@ -1,5 +1,6 @@
 import { AppSecurityError, toSafeErrorResult } from "../../../security/errors";
 import { auditLog, createCorrelationId, createRequestId, securityLog } from "../../../security/logger";
+import { incrementSecurityMetric } from "../../../security/metrics";
 
 const allowedOrigins = new Set(["https://ford-plus-vinshare.expo.app", "http://localhost:8081"]);
 
@@ -129,6 +130,7 @@ export const parseJsonBody = async <T>(request: Request, maxSize = 32_768): Prom
 
   let payload: unknown;
   try {
+    incrementSecurityMetric("api_requests_total");
     payload = await request.json();
   } catch {
     throw new AppSecurityError("Malformed JSON", {
@@ -171,6 +173,7 @@ export const withSecurity = async (
       headers,
     });
   } catch (error) {
+    incrementSecurityMetric("api_errors_total");
     const safeError = toSafeErrorResult(error);
     securityLog("warn", "api_error", {
       requestId,

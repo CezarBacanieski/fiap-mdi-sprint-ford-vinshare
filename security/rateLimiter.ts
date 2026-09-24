@@ -28,6 +28,7 @@ export class InMemoryRateLimiter {
     const bucket = this.state.get(key) ?? { hits: [] };
 
     if (bucket.blockedUntil && bucket.blockedUntil > now) {
+      incrementSecurityMetric("rate_limit_blocked_total");
       return {
         allowed: false,
         remaining: 0,
@@ -38,6 +39,7 @@ export class InMemoryRateLimiter {
     bucket.hits = bucket.hits.filter((time) => now - time < this.options.windowMs);
 
     if (bucket.hits.length >= this.options.limit) {
+      incrementSecurityMetric("rate_limit_blocked_total");
       const blockDuration = this.options.blockDurationMs ?? this.options.windowMs;
       bucket.blockedUntil = now + blockDuration;
       this.state.set(key, bucket);
@@ -70,3 +72,4 @@ export const actionRateLimiter = new InMemoryRateLimiter({
   windowMs: 60 * 1000,
   blockDurationMs: 60 * 1000,
 });
+import { incrementSecurityMetric } from "./metrics";

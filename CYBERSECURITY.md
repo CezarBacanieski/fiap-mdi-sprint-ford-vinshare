@@ -1,5 +1,7 @@
 # CYBERSECURITY.md
 
+> **Documento histórico.** O relatório consolidado e validado da Sprint 3 está em [`docs/cybersecurity/SPRINT3.md`](docs/cybersecurity/SPRINT3.md). Onde houver divergência, o relatório da Sprint 3 prevalece, especialmente quanto ao uso inadequado anterior de `EXPO_PUBLIC_STORAGE_SECRET`.
+
 ## 1) Visão geral da arquitetura de segurança
 
 Esta implementação aplica **Secure by Default**, **OWASP Top 10**, **Zero Trust** e controles práticos para o escopo acadêmico do Ford+.

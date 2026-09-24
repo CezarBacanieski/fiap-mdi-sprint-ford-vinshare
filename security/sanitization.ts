@@ -10,8 +10,15 @@ export const normalizeText = (value: string): string => {
 };
 
 export const sanitizeText = (value: string): string => {
+  if (disallowedPattern.test(value) || controlCharsPattern.test(value)) {
+    throw new AppSecurityError("Unsafe characters in input", {
+      code: "MALICIOUS_INPUT",
+      status: 400,
+      publicMessage: "Entrada inválida detectada.",
+    });
+  }
   const normalized = normalizeText(value);
-  return normalized.replace(disallowedPattern, "");
+  return normalized;
 };
 
 export const sanitizeNumeric = (value: string): string => {
