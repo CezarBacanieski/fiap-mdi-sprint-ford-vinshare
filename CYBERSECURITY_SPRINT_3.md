@@ -56,15 +56,21 @@ Fronteiras de confiança: dispositivo e storage local; tráfego de saída para s
 
 Testes reduzem regressões conhecidas; SAST procura padrões de código vulnerável; SCA sinaliza versões vulneráveis; Gitleaks procura segredos versionados. Para que funcionem como gates efetivos, é necessário confirmar execuções no GitHub e configurar a proteção de branch. Semgrep pode ser adicionado ao CI depois de provisionar a ferramenta e definir severidades que falham o job.
 
-[INSERIR PRINT — GitHub Actions — workflow `Security Pipeline` — mostrar execução real de cada job e seus estados]
 
-[INSERIR PRINT — GitHub Actions — job `CodeQL SAST` — mostrar execução e resultado concluído]
+GitHub Actions — workflow `Security Pipeline` — mostra execução real de cada job e seus estados
+![alt text](image.png)
 
-[INSERIR PRINT — GitHub Actions — job `Secret Scanning` — mostrar execução Gitleaks concluída]
+GitHub Actions — job `CodeQL SAST` — mostra execução e resultado concluído
+![alt text](image-1.png)
 
-[INSERIR PRINT — GitHub Actions — job `Dependency and Audit Scan` — mostrar resultado real do `npm audit`, inclusive falha/achados se houver]
+GitHub Actions — job `Secret Scanning` — mostra execução Gitleaks concluída
+![alt text](image-2.png)
 
-[INSERIR PRINT — GitHub Dependabot — configuração ou PR de atualização npm — mostrar frequência semanal]
+GitHub Actions — job `Dependency and Audit Scan` — mostra resultado real do `npm audit`, inclusive falha/achados se houver
+![alt text](image-3.png)
+
+GitHub Dependabot — configuração ou PR de atualização npm — mostrar frequência semanal
+![alt text](image-4.png)
 
 ## 3. Segurança em código e infraestrutura
 
@@ -74,19 +80,26 @@ O módulo `security/auth.ts` cria access tokens opacos com validade de 15 minuto
 
 Limitações de alto impacto identificadas no código: a identidade de demonstração e sua senha são fixas em `security/auth.ts`; a tela preenche e-mail e senha de demonstração em `app/sign-in.tsx`; se Web Crypto não estiver disponível, a derivação cai para um hash FNV fraco (`weakHashFallback`). A implementação é exclusivamente acadêmica e não deve ser usada como autenticação de produção. Além disso, o login/refresco da interface não chama as rotas `app/api/auth/*`; elas existem como endpoints demonstrativos separados.
 
-[INSERIR PRINT — arquivo `security/auth.ts` — linhas 19 a 29 e 245 a 325 — mostrar tempos, estado em memória, rotação, replay, revogação e validação do access token]
+arquivo `app/sign-in.tsx` — linhas 13 a 18 — mostrar credenciais preenchidas para demonstração
+arquivo `security/auth.ts` — linhas 19 a 29 e 245 a 325 — mostrar tempos, estado em memória, rotação, replay, revogação e validação do access token
 
-[INSERIR PRINT — arquivo `security/auth.ts` — linhas 55 a 85 e 170 a 190 — mostrar fallback de hash e identidade de demonstração; evidência da limitação]
+![alt text](image-5.png)
+![alt text](image-6.png)
 
-[INSERIR PRINT — arquivo `app/sign-in.tsx` — linhas 13 a 18 — mostrar credenciais preenchidas para demonstração]
+arquivo `security/auth.ts` — linhas 55 a 85 e 170 a 190 — mostrar fallback de hash e identidade de demonstração; evidência da limitação
+![alt text](image-7.png)
+![alt text](image-8.png)
+
 
 ### Autorização RBAC — PARCIALMENTE IMPLEMENTADO
 
 `security/permissions.ts` define papéis `admin`, `analyst` e `user` e permissões por ação. O endpoint administrativo exige `security:admin`; o endpoint de veículos valida token e permissão. A UI/hook também verifica permissões. O papel da identidade local é mockado como `user`; papéis e permissões não são mantidos por provedor de identidade central. `analyst` e `user` atualmente têm o mesmo conjunto de permissões, e nenhum mecanismo administrativo de provisionamento foi localizado.
 
-[INSERIR PRINT — arquivo `security/permissions.ts` — linhas 3 a 44 — mostrar papéis, permissões e negação por padrão para ação não autorizada]
+arquivo `security/permissions.ts` — linhas 3 a 44 — mostrar papéis, permissões e negação por padrão para ação não autorizada
+![alt text](image-9.png)
 
-[INSERIR PRINT — arquivo `app/api/admin/audit+api.ts` — linhas 15 a 33 — mostrar validação de token e exigência de `security:admin`]
+arquivo `app/api/admin/audit+api.ts` — linhas 15 a 33 — mostrar validação de token e exigência de `security:admin`
+![alt text](image-10.png)
 
 ### APIs, validação e controles de rede — PARCIALMENTE IMPLEMENTADO
 
@@ -96,13 +109,18 @@ Ponto de atenção: `preflightResponse` anuncia `Content-Type,Authorization,X-Pa
 
 `security/validation.ts` e `security/sanitization.ts` aplicam normalização NFKC, padrões e limites para campos e IDs. Trata-se de validação por allowlist e regras auxiliares; filtros textuais genéricos não substituem queries parametrizadas ou encoding contextual em uma futura camada de banco/UI.
 
-[INSERIR PRINT — arquivo `app/api/_lib/http.ts` — linhas 5 a 20 e 30 a 71 — mostrar allowlist, headers, rate limit e exigência de CSRF]
+arquivo `app/api/_lib/http.ts` — linhas 5 a 20 e 30 a 71 — mostrar allowlist, headers, rate limit e exigência de CSRF
+![alt text](image-11.png)
+![alt text](image-12.png)
 
-[INSERIR PRINT — arquivo `app/api/_lib/http.ts` — linhas 73 a 145 e 148 a 214 — mostrar preflight, parsing limitado, proteção de prototype pollution e erros seguros]
+arquivo `app/api/_lib/http.ts` — linhas 73 a 145 e 148 a 214 — mostrar preflight, parsing limitado, proteção de prototype pollution e erros seguros
+![alt text](image-13.png)
 
-[INSERIR PRINT — arquivo `security/validation.ts` — linhas 32 a 66 — mostrar sanitização de ID e validação de veículo]
+arquivo `security/validation.ts` — linhas 32 a 66 — mostrar sanitização de ID e validação de veículo
+![alt text](image-14.png)
 
-[INSERIR PRINT — arquivo `security/sanitization.ts` — linhas 3 a 45 — mostrar normalização e filtros de entradas]
+arquivo `security/sanitization.ts` — linhas 3 a 45 — mostrar normalização e filtros de entradas
+![alt text](image-15.png)
 
 ### Criptografia e armazenamento — PARCIALMENTE IMPLEMENTADO
 
@@ -110,14 +128,17 @@ Ponto de atenção: `preflightResponse` anuncia `Content-Type,Authorization,X-Pa
 
 As rotas API cifram placa/chassi com AES-GCM usando segredo de ambiente em `app/api/_lib/serverCrypto.ts`, e mascaram valores nas respostas. O banco é um `Map` em memória; não há leitura/descriptografia persistente implementada. Em `app/api/_lib/payloadSignature.ts`, a assinatura HMAC usa valor padrão acadêmico quando `API_HMAC_SECRET` não está definido. Esse fallback invalida qualquer alegação de segredo forte em produção; a chave real deve ser fornecida por secret manager e o fallback removido. `.env.example` traz apenas valor placeholder.
 
-[INSERIR PRINT — arquivo `services/storage.ts` — linhas 21 a 59 — mostrar quais chaves usam SecureStore e quais continuam em AsyncStorage]
+arquivo `services/storage.ts` — linhas 21 a 59 — mostrar quais chaves usam SecureStore e quais continuam em AsyncStorage
+![alt text](image-16.png)
 
-[INSERIR PRINT — arquivo `app/api/_lib/serverCrypto.ts` — linhas 6 a 23 — mostrar exigência de segredo, AES-GCM e IV aleatório]
+arquivo `app/api/_lib/serverCrypto.ts` — linhas 6 a 23 — mostrar exigência de segredo, AES-GCM e IV aleatório
+![alt text](image-17.png)
 
-[INSERIR PRINT — arquivo `app/api/_lib/payloadSignature.ts` — linhas 5 a 28 e 40 a 57 — mostrar HMAC e fallback de segredo acadêmico; evidência da limitação]
+arquivo `app/api/_lib/payloadSignature.ts` — linhas 5 a 28 e 40 a 57 — mostrar HMAC e fallback de segredo acadêmico; evidência da limitação
+![alt text](image-18.png)
 
-[INSERIR PRINT — arquivo `app.json` — linhas 35 a 52 — mostrar plugins Expo SDK 55 e configuração SecureStore/headers]
-
+arquivo `app.json` — linhas 35 a 52 — mostrar plugins Expo SDK 55 e configuração SecureStore/headers]
+![alt text](image-19.png)
 ### Outros controles de infraestrutura
 
 | Controle | Estado | Evidência/observação |
@@ -145,15 +166,17 @@ As rotas API cifram placa/chassi com AES-GCM usando segredo de ambiente em `app/
 | ML | NÃO APLICÁVEL | Componente não existe. |
 | Alertas operacionais | NÃO IMPLEMENTADO | Há eventos de log/bloqueio, sem serviço de notificação/plantão. |
 
-[INSERIR PRINT — arquivo `security/logger.ts` — linhas 4 a 22 e 38 a 77 — mostrar redaction e saída JSON]
+arquivo `security/logger.ts` — linhas 4 a 22 e 38 a 77 — mostrar redaction e saída JSON
+![alt text](image-20.png)
 
-[INSERIR PRINT — arquivo `security/metrics.ts` — linhas 1 a 36 — mostrar nomes e armazenamento em memória dos contadores]
+arquivo `security/metrics.ts` — linhas 1 a 36 — mostrar nomes e armazenamento em memória dos contadores
+![alt text](image-21.png)
 
-[INSERIR PRINT — dashboard local Ford+ — aba Segurança — mostrar contadores reais da sessão demonstrativa e horário de atualização]
+arquivo `app/api/security/status+api.ts` — linhas 8 a 30 — mostrar endpoint e métricas expostas
+![alt text](image-22.png)
 
-[INSERIR PRINT — arquivo `app/api/security/status+api.ts` — linhas 8 a 30 — mostrar endpoint e métricas expostas]
-
-[INSERIR PRINT — terminal — comando `npm run test:security` — mostrar saída real dos testes; executar antes de capturar]
+terminal — comando `npm run test:security` — mostrar saída real dos testes; executar antes de capturar]
+![alt text](image-23.png)
 
 ### Fluxo de resposta a incidentes
 
