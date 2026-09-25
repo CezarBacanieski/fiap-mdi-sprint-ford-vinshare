@@ -1,132 +1,106 @@
 # Ford+
 
-Aplicativo mobile da FIAP para o **Desafio 02 — Boosting VIN Share in South America with Intelligent Solutions**, em parceria com a Ford. O Ford+ incentiva o retorno à rede oficial ao reunir informações do veículo, manutenção preventiva, agendamento de serviços e benefícios de fidelidade em uma experiência local e demonstrável.
+Aplicativo mobile desenvolvido para o **Desafio 02 — Boosting VIN Share in South America with Intelligent Solutions**, da FIAP em parceria com a Ford. O Ford+ propõe fortalecer o relacionamento com proprietários e incentivar a manutenção na rede oficial Ford ao reunir informações do veículo, recomendações de manutenção, agendamento de serviços e benefícios de fidelidade. A demonstração usa dados locais e integrações públicas; não mede aumento real de VIN Share.
 
 ## Funcionalidades disponíveis
 
-- Onboarding persistido localmente e encerramento de sessão para repetir a demonstração.
+- Onboarding e encerramento de sessão locais para repetir a demonstração.
 - Dashboard com veículo principal, Vehicle Health Score, manutenção recomendada, próximo serviço e histórico recente.
 - Garagem de veículos: listagem, cadastro local, detalhe técnico, saúde por sistema e exclusão confirmada.
 - Serviços: histórico, agendamentos futuros, detalhe de agendamento e novo agendamento em três etapas.
-- Concessionárias simuladas com busca; consulta de CEP via ViaCEP ao selecionar uma unidade.
-- Consulta de modelos Ford via FIPE durante o cadastro do veículo.
+- Concessionárias de demonstração com busca; consulta do endereço pelo CEP via ViaCEP durante o agendamento.
+- Busca de modelos Ford na API pública FIPE durante o cadastro do veículo.
 - Ford+ Rewards: saldo, níveis, transações, ganho de pontos e resgate local de benefícios.
 - Perfil editável com persistência em AsyncStorage e preferências de notificações e lembretes.
-- Notificações locais em builds de desenvolvimento/produção quando o dispositivo concede permissão.
+- Notificações locais e lembrete de serviço quando disponíveis no dispositivo e com permissão concedida. No Android, o app desativa essa integração no Expo Go; valide em development build ou APK.
 
-Os dados de veículos, serviços, rewards e perfil são exemplos locais inicializados no primeiro uso. Não há integração com APIs Ford nem backend de produção.
+Veículos, serviços, concessionárias, rewards e perfil começam com dados de demonstração e ficam no armazenamento local do app. FIPE e ViaCEP são as únicas APIs externas usadas; não há integração com APIs Ford, backend de produção, mapa ou geolocalização.
 
 ## Stack
 
-- Expo SDK 57, React Native 0.86 e TypeScript estrito.
+- Expo SDK 57, React Native 0.86.3, React 19.2.3 e TypeScript 6.
 - Expo Router para navegação por arquivos.
 - React Native Paper, Expo Vector Icons, Reanimated e SVG para a interface.
-- TanStack React Query para consultas FIPE e concessionárias.
-- AsyncStorage para persistência local.
-- Axios, date-fns, ViaCEP e API FIPE.
+- TanStack React Query para a consulta de modelos FIPE e carregamento dos dados locais de concessionárias.
+- AsyncStorage para persistência de onboarding, veículos, serviços, perfil, rewards e preferências.
+- Axios para chamadas HTTP; date-fns para datas; APIs públicas FIPE e ViaCEP.
+- Expo Notifications para notificações locais (não push remoto).
 
 ## Arquitetura
 
 ```text
 app/
-  (tabs)/              # Dashboard, veículos, serviços, rewards e perfil
-  onboarding/          # Fluxo inicial
-  vehicle/[id].tsx     # Detalhe de veículo
-  service/new.tsx      # Novo agendamento
-  service/[id].tsx     # Detalhe de agendamento
+  _layout.tsx           # raiz, providers e navegação inicial
+  (tabs)/               # dashboard, veículos, serviços, rewards e perfil
+  onboarding/           # fluxo inicial
+  vehicle/[id].tsx      # detalhe/saúde do veículo
+  service/new.tsx       # agendamento em etapas
+  service/[id].tsx      # detalhe de agendamento
 components/
-  ui/                  # Componentes visuais reutilizáveis
-  charts/              # Gráficos de saúde e fidelidade
-hooks/                 # Estado e operações de domínio
-services/              # Storage, notificações e integrações HTTP
-constants/             # Tema e dados de demonstração
-types/                 # Tipos do domínio
-docs/screenshots/      # Evidências da versão final (captura manual)
+  ui/                   # componentes visuais reutilizáveis
+  charts/               # gráficos de manutenção e fidelidade
+hooks/                  # estado e operações de domínio
+services/               # AsyncStorage, notificações e integrações HTTP
+constants/              # tema e dados de demonstração
+types/                  # tipos do domínio
+assets/prints/          # capturas de tela já disponíveis
+__tests__/, *.test.tsx  # testes automatizados
 ```
 
 ## Como executar
 
-Pré-requisitos: Node.js LTS e npm.
+Pré-requisitos: Node.js 22.13 ou superior (requisito do Expo SDK 57) e npm. Veja a [referência do SDK 57](https://docs.expo.dev/versions/v57.0.0/).
 
 ```bash
-npm install
+npm ci
 npm run doctor
 npm run typecheck
-npx expo start
+npm run start
 ```
 
-Para abrir no Android conectado/emulado:
+Para iniciar diretamente em um emulador Android ou dispositivo configurado:
 
 ```bash
 npm run android
 ```
 
-O Expo Go é adequado para a maior parte da demonstração. Por restrições da plataforma, as notificações locais Android devem ser validadas em development build ou APK instalado.
+Também é possível abrir `npx expo start` e ler o QR code com o Expo Go compatível com SDK 57. No Android, notificações locais não são suportadas pelo Expo Go usado por este projeto; valide-as em development build ou APK instalado.
 
 ## Build Android (APK)
 
-O arquivo `eas.json` contém o perfil `preview`, configurado para gerar um APK instalável, e o identificador Android é `br.com.fiap.fordplus`.
+O perfil `preview` em `eas.json` usa distribuição interna e `android.buildType: apk`, gerando um APK instalável. O identificador Android é `br.com.fiap.fordplus`.
 
 ```bash
 npx eas-cli login
 npm run build:android:apk
 ```
 
-Ao final, o EAS exibirá um link para baixar o APK. Transfira-o ao aparelho e permita a instalação de apps da fonte usada para o download quando o Android solicitar. O perfil `production` gera AAB para publicação em loja.
+Quando o build terminar, o EAS CLI exibirá o link do artefato; também é possível abrir a página da build e baixar o APK. No aparelho Android, abra o arquivo e confirme a instalação se solicitado. O perfil `production` gera AAB para distribuição pela loja, não APK instalável diretamente.
 
-### APK Sprint 3
+### APK disponível
 
-- Arquivo/release: adicionar após o EAS Build.
-- Link de download: adicionar após o EAS Build.
-- Instalação: baixar o APK no Android, abrir o arquivo e confirmar a instalação.
+- [Baixar APK da build EAS `21da9131`](https://expo.dev/accounts/vitorbmulford/projects/ford-plus-vinshare/builds/8809d57a-594e-4e61-a27b-02f8a6f267b4).
+- Essa build terminou com sucesso em Expo SDK 57, mas foi feita no commit `9b44620`; o `main` atual está no commit `2264af5` e contém mudanças posteriores. Gere um novo build pelo comando acima para produzir o APK correspondente exatamente ao código atual.
+- O link direto do artefato tem expiração indicada pelo EAS em **8 de outubro de 2026**.
 
-## Testes e validações locais
+## Testes e validação da Sprint 3
 
-```bash
-npm run typecheck
-npm test
-npm run doctor
-npx expo export --platform android
-```
+Na branch `main` (commit `2264af5`), a instalação limpa e as verificações locais concluíram:
 
-O último comando valida a criação do bundle Android; ele não gera um APK instalável. O APK é produzido pelo comando EAS acima.
+- `npm ci` — dependências instaladas pelo lockfile.
+- `npm test` — 28/28 testes aprovados em 8 suítes.
+- `npm run typecheck` — TypeScript aprovado.
+- `npm run doctor` — Expo Doctor: 21/21 verificações aprovadas.
+- `npx expo export --platform android` — bundle Android exportado; este comando não gera APK.
 
-## Validação da Sprint 3
+A suíte Jest usa `jest-expo` e Testing Library com mocks para AsyncStorage, Expo Notifications, Expo Router, FIPE e ViaCEP. Cobre persistência, hooks de domínio, onboarding/logout, veículos, agendamento, rewards, perfil, preferências de notificação, Error Boundary e atualização da aba de veículos ao receber foco.
 
-### Testes automatizados
+**Status da entrega:** código atual de `main` validado por testes, typecheck, Expo Doctor e exportação Android. A build EAS terminada e linkada acima é de um commit anterior; a instalação e o smoke test do APK construído a partir do `main` atual ainda precisam ser feitos.
 
-- 28 testes automatizados em 8 arquivos de teste.
-- 28/28 aprovados.
-- TypeScript aprovado.
-- Expo Doctor: 21/21 verificações aprovadas.
-
-Cobertura funcional:
-
-- persistência e AsyncStorage;
-- veículos, confirmação de exclusão e atualização ao retornar o foco;
-- serviços, validações e agendamentos;
-- rewards e perfil;
-- onboarding e logout;
-- FIPE e ViaCEP;
-- notificações e preferências de lembretes;
-- Error Boundary e ação de tentar novamente.
-
-### Validação do build
-
-- `npm run typecheck` ✅
-- `npm run doctor` ✅
-- `npm test` ✅
-- `npx expo export --platform android` ✅
-- EAS Build APK: [em fila](https://expo.dev/accounts/vitorbmulford/projects/ford-plus-vinshare/builds/21da9131-7ae3-460f-82ca-1125251d2a5d)
-- Instalação e smoke test Android: pendentes da conclusão da build.
-
-### Testes automatizados
-
-A suíte Jest usa `jest-expo` e Testing Library com mocks para AsyncStorage, Expo Notifications, Expo Router, FIPE e ViaCEP. Ela cobre persistência, hooks de domínio, onboarding/logout, veículos, agendamento, rewards, perfil, preferências de notificação, Error Boundary e o recarregamento da aba de veículos ao receber foco.
+### Executar os testes
 
 ```bash
 npm test
-# desenvolvimento
 npm run test:watch
 ```
 
@@ -144,20 +118,27 @@ npm run test:watch
 - [ ] Editar dados do perfil, sair e reiniciar o onboarding.
 - [ ] Validar a permissão e um lembrete local no APK/development build.
 
-## Screenshots para a entrega
+## Demonstração visual
 
-As imagens antigas em `assets/prints/` não são a evidência da versão final e não devem ser usadas no relatório da Sprint 3. Após instalar o APK, capture manualmente e salve as imagens atuais em `docs/screenshots/`:
+As telas abaixo reutilizam as capturas existentes em `assets/prints/` e demonstram os principais fluxos do aplicativo.
 
-1. `01-onboarding.png` — primeira tela do onboarding.
-2. `02-dashboard.png` — dashboard com Health Score e alerta de serviço.
-3. `03-veiculos.png` — garagem de veículos.
-4. `04-detalhe-veiculo.png` — saúde por sistema e linha do tempo.
-5. `05-servicos.png` — lista de próximos serviços.
-6. `06-novo-agendamento-etapa-1.png` — veículo e tipo de serviço.
-7. `07-novo-agendamento-etapa-2.png` — concessionária, data e horário.
-8. `08-confirmacao-agendamento.png` — resumo/feedback após confirmar.
-9. `09-rewards.png` — saldo, nível e benefícios.
-10. `10-perfil.png` — perfil e configurações.
+### Dashboard
+
+![Dashboard Ford+ com veículo, Vehicle Health Score e próximo serviço](assets/prints/Captura%20de%20tela%202026-05-20%20203529.png)
+
+### Garagem de veículos
+
+![Garagem com veículos cadastrados e seus Vehicle Health Scores](assets/prints/Captura%20de%20tela%202026-05-20%20203555.png)
+
+### Agendamento de serviço
+
+![Primeira etapa: seleção do veículo e tipo de serviço](assets/prints/Captura%20de%20tela%202026-05-20%20203744.png)
+
+![Segunda etapa: concessionária, data e horário](assets/prints/Captura%20de%20tela%202026-05-20%20203756.png)
+
+### Ford+ Rewards
+
+![Saldo, nível, opções de ganho e resgate de benefícios](assets/prints/Captura%20de%20tela%202026-05-20%20203653.png)
 
 ## Limitações atuais
 
