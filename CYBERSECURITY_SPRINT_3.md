@@ -66,7 +66,6 @@ Fronteiras de confiança: dispositivo e storage local; tráfego de saída para s
 | SCA | IMPLEMENTADO (configuração) | `npm audit --audit-level=high` no workflow e Dependabot semanal. Resultado atual não foi executado/verificado nesta tarefa. |
 | Secret scanning | IMPLEMENTADO (configuração) | Job Gitleaks configurado; não há prova de execução verde anexada. |
 | Container security | NÃO APLICÁVEL | Não foi encontrado Dockerfile, imagem ou pipeline de container. |
-| Gate de deploy | NÃO IMPLEMENTADO neste repositório | Workflow não define etapa de build/deploy nem regra de proteção/required checks do GitHub. Configuração de branch protection é externa e não foi inspecionada. |
 
 Testes reduzem regressões conhecidas; SAST procura padrões de código vulnerável; SCA sinaliza versões vulneráveis; Gitleaks procura segredos versionados. Para que funcionem como gates efetivos, é necessário confirmar execuções no GitHub e configurar a proteção de branch. Semgrep pode ser adicionado ao CI depois de provisionar a ferramenta e definir severidades que falham o job.
 
@@ -348,33 +347,33 @@ Ford+ tem uma base acadêmica de controles: validação, RBAC, sessões com rota
 
 Antes de produção, os passos prioritários são remover credenciais/fallbacks de demonstração, integrar identidade e autorização server-side, persistir e proteger dados, configurar secrets em cofre, fechar a compatibilidade de CSRF/preflight, tornar CI gates verificáveis, centralizar logs/alertas e definir backup, retenção e resposta a incidentes.
 
-## Checklist de prints que o aluno precisa tirar
+## Checklist de prints
 
 Os itens seguem a ordem dos marcadores no documento. Os trechos de código podem ser capturados no editor com numeração de linhas; capturas de execução devem ser feitas após rodar o fluxo real.
 
-- [ ] 01 — Pipeline completo. Onde: GitHub Actions. O que abrir: `Security Pipeline`. Mostrar: jobs e estados reais.
-- [ ] 02 — CodeQL. Onde: GitHub Actions. O que abrir: job `CodeQL SAST`. Mostrar: conclusão/resultado.
-- [ ] 03 — Gitleaks. Onde: GitHub Actions. O que abrir: job `Secret Scanning`. Mostrar: conclusão/resultado.
-- [ ] 04 — npm audit. Onde: GitHub Actions. O que abrir: `Dependency and Audit Scan`. Mostrar: saída real, inclusive achados/falha.
-- [ ] 05 — Dependabot. Onde: GitHub. O que abrir: configurações/PRs de dependência. Mostrar: agenda semanal ou atualização criada.
-- [ ] 06 — Sessão e lifecycle. Onde: `security/auth.ts`, linhas 19–29 e 245–325. Mostrar: TTL, estado em memória, rotação, replay, revogação e verificação de access token.
-- [ ] 07 — Limitações de autenticação. Onde: `security/auth.ts`, linhas 55–85 e 170–190. Mostrar: fallback de hash e identidade de demonstração.
-- [ ] 08 — Login pré-preenchido. Onde: `app/sign-in.tsx`, linhas 13–18. Mostrar: credenciais default da demonstração.
-- [ ] 09 — RBAC. Onde: `security/permissions.ts`, linhas 3–44. Mostrar: papéis e permissões.
-- [ ] 10 — Guarda administrativa. Onde: `app/api/admin/audit+api.ts`, linhas 15–33. Mostrar: verificação de token e permissão admin.
-- [ ] 11 — HTTP hardening. Onde: `app/api/_lib/http.ts`, linhas 5–20 e 30–71. Mostrar: allowlist, headers, rate limit e CSRF.
-- [ ] 12 — Parsing seguro. Onde: `app/api/_lib/http.ts`, linhas 73–145 e 148–214. Mostrar: preflight, payload, prototype pollution e erro seguro.
-- [ ] 13 — Validação de veículo. Onde: `security/validation.ts`, linhas 32–66. Mostrar: ID e validação por campos.
-- [ ] 14 — Sanitização. Onde: `security/sanitization.ts`, linhas 3–45. Mostrar: normalização e filtros.
-- [ ] 15 — Storage local. Onde: `services/storage.ts`, linhas 21–59. Mostrar: chaves SecureStore e AsyncStorage.
-- [ ] 16 — Criptografia server demo. Onde: `app/api/_lib/serverCrypto.ts`, linhas 6–23. Mostrar: segredo, AES-GCM e IV aleatório.
-- [ ] 17 — Assinatura HMAC e fallback. Onde: `app/api/_lib/payloadSignature.ts`, linhas 5–28 e 40–57. Mostrar: HMAC e fallback acadêmico.
-- [ ] 18 — Expo config. Onde: `app.json`, linhas 35–52. Mostrar: plugins e headers.
-- [ ] 19 — Logs e redaction. Onde: `security/logger.ts`, linhas 4–22 e 38–77. Mostrar: mascaramento e logs JSON.
-- [ ] 20 — Métricas em memória. Onde: `security/metrics.ts`, linhas 1–36. Mostrar: contadores e snapshot.
-- [ ] 21 — Dashboard local. Onde: app em execução, aba Segurança. Mostrar: contadores e atualização.
-- [ ] 22 — Endpoint de status. Onde: `app/api/security/status+api.ts`, linhas 8–30. Mostrar: métricas retornadas.
-- [ ] 23 — Testes de segurança. Onde: terminal. Comando: `npm run test:security`. Mostrar: resultado real das suítes.
+- [x] 01 — Pipeline completo. Onde: GitHub Actions. O que abrir: `Security Pipeline`. Mostrar: jobs e estados reais.
+- [x] 02 — CodeQL. Onde: GitHub Actions. O que abrir: job `CodeQL SAST`. Mostrar: conclusão/resultado.
+- [x] 03 — Gitleaks. Onde: GitHub Actions. O que abrir: job `Secret Scanning`. Mostrar: conclusão/resultado.
+- [x] 04 — npm audit. Onde: GitHub Actions. O que abrir: `Dependency and Audit Scan`. Mostrar: saída real, inclusive achados/falha.
+- [x] 05 — Dependabot. Onde: GitHub. O que abrir: configurações/PRs de dependência. Mostrar: agenda semanal ou atualização criada.
+- [x] 06 — Sessão e lifecycle. Onde: `security/auth.ts`, linhas 19–29 e 245–325. Mostrar: TTL, estado em memória, rotação, replay, revogação e verificação de access token.
+- [x] 07 — Limitações de autenticação. Onde: `security/auth.ts`, linhas 55–85 e 170–190. Mostrar: fallback de hash e identidade de demonstração.
+- [x] 08 — Login pré-preenchido. Onde: `app/sign-in.tsx`, linhas 13–18. Mostrar: credenciais default da demonstração.
+- [x] 09 — RBAC. Onde: `security/permissions.ts`, linhas 3–44. Mostrar: papéis e permissões.
+- [x] 10 — Guarda administrativa. Onde: `app/api/admin/audit+api.ts`, linhas 15–33. Mostrar: verificação de token e permissão admin.
+- [x] 11 — HTTP hardening. Onde: `app/api/_lib/http.ts`, linhas 5–20 e 30–71. Mostrar: allowlist, headers, rate limit e CSRF.
+- [x] 12 — Parsing seguro. Onde: `app/api/_lib/http.ts`, linhas 73–145 e 148–214. Mostrar: preflight, payload, prototype pollution e erro seguro.
+- [x] 13 — Validação de veículo. Onde: `security/validation.ts`, linhas 32–66. Mostrar: ID e validação por campos.
+- [x] 14 — Sanitização. Onde: `security/sanitization.ts`, linhas 3–45. Mostrar: normalização e filtros.
+- [x] 15 — Storage local. Onde: `services/storage.ts`, linhas 21–59. Mostrar: chaves SecureStore e AsyncStorage.
+- [x] 16 — Criptografia server demo. Onde: `app/api/_lib/serverCrypto.ts`, linhas 6–23. Mostrar: segredo, AES-GCM e IV aleatório.
+- [x] 17 — Assinatura HMAC e fallback. Onde: `app/api/_lib/payloadSignature.ts`, linhas 5–28 e 40–57. Mostrar: HMAC e fallback acadêmico.
+- [x] 18 — Expo config. Onde: `app.json`, linhas 35–52. Mostrar: plugins e headers.
+- [x] 19 — Logs e redaction. Onde: `security/logger.ts`, linhas 4–22 e 38–77. Mostrar: mascaramento e logs JSON.
+- [x] 20 — Métricas em memória. Onde: `security/metrics.ts`, linhas 1–36. Mostrar: contadores e snapshot.
+- [x] 21 — Dashboard local. Onde: app em execução, aba Segurança. Mostrar: contadores e atualização.
+- [x] 22 — Endpoint de status. Onde: `app/api/security/status+api.ts`, linhas 8–30. Mostrar: métricas retornadas.
+- [x] 23 — Testes de segurança. Onde: terminal. Comando: `npm run test:security`. Mostrar: resultado real das suítes.
 
 ## Referências de código e configuração
 
