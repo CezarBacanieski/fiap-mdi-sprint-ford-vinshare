@@ -1,3 +1,17 @@
+
+---
+
+# 👥 Integrantes
+
+| Nome                    | RM        |
+| ----------------------- | --------- |
+| Milton Cezar Bacanieski | RM 555206 |
+| Victório Bastelli       | RM 554723 |
+| Lorenzo Mangini         | RM 554901 |
+| Vitor Bebiano           | RM 555026 |
+
+---
+
 # Ford+ — Documento de Cybersecurity da Sprint 3
 
 **Projeto:** Challenge FIAP + Ford — Desafio 02: Boosting VIN Share in South America with Intelligent Solutions  
