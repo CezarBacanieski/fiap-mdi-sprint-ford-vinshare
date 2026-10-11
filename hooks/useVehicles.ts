@@ -4,6 +4,9 @@ import { fetchFordModels } from "../services/api";
 import { loadVehicles, saveVehicles } from "../services/storage";
 import { FipeModel, NewVehicleInput, Vehicle } from "../types";
 
+const normalizePlate = (plate: string): string => plate.replace(/[^A-Za-z0-9]/g, "").toLocaleUpperCase("pt-BR");
+const isValidPlate = (plate: string): boolean => /^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(plate);
+
 interface UseVehiclesResult {
   vehicles: Vehicle[];
   isLoading: boolean;
@@ -37,17 +40,27 @@ export const useVehicles = (): UseVehiclesResult => {
 
   const addVehicle = useCallback(
     async (input: NewVehicleInput) => {
+      const plate = normalizePlate(input.plate);
+      if (!isValidPlate(plate)) {
+        throw new Error("Informe uma placa brasileira válida.");
+      }
+
+      if (vehicles.some((vehicle) => normalizePlate(vehicle.plate) === plate)) {
+        throw new Error("Este veículo já está cadastrado na garagem.");
+      }
+
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const vehicle: Vehicle = {
-        id: `v-${Date.now()}`,
+        id: `v-${uniqueId}`,
         brand: input.brand,
         model: input.model,
         version: input.version || "Versao nao informada",
         year: input.year,
-        plate: input.plate.toLocaleUpperCase("pt-BR"),
+        plate,
         mileage: input.mileage,
         fuelType: input.fuelType,
         color: input.color || "Azul Indianapolis",
-        chassi: `9BF${Date.now().toString().slice(-12)}`,
+        chassi: `9BF${uniqueId.replace(/\D/g, "").slice(-14).padStart(14, "0")}`,
         healthScore: 86,
         lastService: new Date().toISOString().slice(0, 10),
         nextService: new Date(Date.now() + 1000 * 60 * 60 * 24 * 180).toISOString().slice(0, 10),

@@ -77,6 +77,13 @@ export const saveRewardTransactions = async (transactions: RewardTransaction[]):
   await setJsonItem(storageKeys.rewards, transactions);
 };
 
+export const saveRewardsState = async (user: User, transactions: RewardTransaction[]): Promise<void> => {
+  await AsyncStorage.multiSet([
+    [storageKeys.user, JSON.stringify(user)],
+    [storageKeys.rewards, JSON.stringify(transactions)],
+  ]);
+};
+
 export const resetOnboardingFlag = async (): Promise<void> => {
   await AsyncStorage.removeItem(storageKeys.onboardingComplete);
 };

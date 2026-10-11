@@ -25,22 +25,27 @@ const initialForm: NewVehicleInput = {
   color: "",
 };
 
+const normalizePlate = (plate: string) => plate.replace(/[^A-Za-z0-9]/g, "").toLocaleUpperCase("pt-BR");
+const isValidPlate = (plate: string) => /^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(normalizePlate(plate));
+
 export default function VehiclesScreen() {
   const { vehicles, isLoading, errorMessage, addVehicle, deleteVehicle, reloadVehicles } = useVehicles();
   const [modalVisible, setModalVisible] = useState(false);
   const [modelMenuVisible, setModelMenuVisible] = useState(false);
   const [form, setForm] = useState<NewVehicleInput>(initialForm);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const { data: fipeModels = [], isFetching } = useFordModels(form.model);
 
   const formValid = useMemo(() => {
-    return form.model.trim().length > 1 && form.plate.trim().length >= 7 && form.mileage >= 0;
+    return form.model.trim().length > 1 && isValidPlate(form.plate) && form.mileage >= 0;
   }, [form]);
 
   const closeModal = () => {
     setModalVisible(false);
     setModelMenuVisible(false);
     setForm(initialForm);
+    setFormError(null);
   };
 
   useFocusEffect(
@@ -66,6 +71,8 @@ export default function VehiclesScreen() {
     try {
       await addVehicle(form);
       closeModal();
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Não foi possível salvar o veículo.");
     } finally {
       setSaving(false);
     }
@@ -210,6 +217,10 @@ export default function VehiclesScreen() {
               style={styles.halfInput}
             />
           </View>
+          <HelperText type="error" visible={Boolean(form.plate) && !isValidPlate(form.plate)}>
+            Informe uma placa no formato ABC1D23 ou ABC-1234.
+          </HelperText>
+          <HelperText type="error" visible={Boolean(formError)}>{formError ?? ""}</HelperText>
 
           <TextInput
             label="Cor"

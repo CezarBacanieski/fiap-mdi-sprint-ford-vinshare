@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { isBefore, isValid, parseISO, startOfDay } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchDealerships } from "../services/api";
 import { loadServices, loadVehicles, saveServices } from "../services/storage";
@@ -55,15 +56,30 @@ export const useServices = (): UseServicesResult => {
       const [vehicles, dealerships] = await Promise.all([loadVehicles(), fetchDealerships()]);
       const vehicle = vehicles.find((item) => item.id === input.vehicleId);
       const dealership = dealerships.find((item) => item.id === input.dealershipId);
+      const appointmentDate = parseISO(`${input.date}T${input.time}:00`);
+
+      if (!vehicle) {
+        throw new Error("O veículo selecionado não está mais disponível.");
+      }
+      if (!dealership) {
+        throw new Error("A concessionária selecionada não está disponível.");
+      }
+      if (input.serviceTypes.length === 0 || input.mileage < 0) {
+        throw new Error("Informe ao menos um serviço e uma quilometragem válida.");
+      }
+      if (!/^\d{2}:\d{2}$/.test(input.time) || !isValid(appointmentDate) || isBefore(appointmentDate, startOfDay(new Date()))) {
+        throw new Error("Escolha uma data e horário futuros para o agendamento.");
+      }
+
       const service: ServiceRecord = {
-        id: `s-${Date.now()}`,
+        id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         vehicleId: input.vehicleId,
-        vehicleName: vehicle?.model ?? "Ford",
+        vehicleName: vehicle.model,
         type: input.serviceTypes.join(", "),
         date: input.date,
         time: input.time,
         dealershipId: input.dealershipId,
-        dealershipName: dealership?.name ?? "Concessionaria Ford",
+        dealershipName: dealership.name,
         mileage: input.mileage,
         status: "Agendado",
         notes: input.notes,

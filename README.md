@@ -80,15 +80,15 @@ Quando o build terminar, o EAS CLI exibirá o link do artefato; também é poss�
 ### APK disponível
 
 - [Baixar APK da build EAS `21da9131`](https://expo.dev/accounts/vitorbmulford/projects/ford-plus-vinshare/builds/8809d57a-594e-4e61-a27b-02f8a6f267b4).
-- Essa build terminou com sucesso em Expo SDK 57, mas foi feita no commit `9b44620`; o `main` atual está no commit `2264af5` e contém mudanças posteriores. Gere um novo build pelo comando acima para produzir o APK correspondente exatamente ao código atual.
+- Essa build terminou com sucesso em Expo SDK 57, mas foi feita no commit `9b44620`; o HEAD auditado (`c3b238b`) e as correções locais posteriores não correspondem a esse APK. Gere um novo build pelo comando acima para produzir o APK correspondente exatamente ao código a entregar.
 - O link direto do artefato tem expiração indicada pelo EAS em **8 de outubro de 2026**.
 
 ## Testes e validação da Sprint 3
 
-Na branch `main` (commit `2264af5`), a instalação limpa e as verificações locais concluíram:
+No HEAD auditado da branch `main` (`c3b238b`) e após as correções locais da Sprint 4, as verificações concluíram:
 
 - `npm ci` — dependências instaladas pelo lockfile.
-- `npm test` — 28/28 testes aprovados em 8 suítes.
+- `npm test` — 31/31 testes aprovados em 8 suítes.
 - `npm run typecheck` — TypeScript aprovado.
 - `npm run doctor` — Expo Doctor: 21/21 verificações aprovadas.
 - `npx expo export --platform android` — bundle Android exportado; este comando não gera APK.

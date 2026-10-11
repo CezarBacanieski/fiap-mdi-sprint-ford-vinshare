@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { redeemableRewards, tierDefinitions } from "../constants/mockData";
 import {
   loadRewardTransactions,
   loadUser,
-  saveRewardTransactions,
+  saveRewardsState,
   saveUser,
 } from "../services/storage";
 import { Reward, RewardTransaction, TierDefinition, User, UserTier } from "../types";
@@ -38,6 +38,18 @@ export const useRewards = (): UseRewardsResult => {
   const [user, setUser] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<RewardTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const userRef = useRef<User | null>(null);
+  const transactionsRef = useRef<RewardTransaction[]>([]);
+  const mutationQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+
+  const enqueueMutation = useCallback(<T,>(operation: () => Promise<T>): Promise<T> => {
+    const result = mutationQueueRef.current.then(operation);
+    mutationQueueRef.current = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }, []);
 
   const reloadRewards = useCallback(async () => {
     setIsLoading(true);
@@ -45,6 +57,8 @@ export const useRewards = (): UseRewardsResult => {
       loadUser(),
       loadRewardTransactions(),
     ]);
+    userRef.current = storedUser;
+    transactionsRef.current = storedTransactions;
     setUser(storedUser);
     setTransactions(storedTransactions);
     setIsLoading(false);
@@ -71,65 +85,80 @@ export const useRewards = (): UseRewardsResult => {
   }, [currentTier, user]);
 
   const persistUser = useCallback(async (nextUser: User) => {
+    userRef.current = nextUser;
     setUser(nextUser);
     await saveUser(nextUser);
   }, []);
 
   const updateUser = useCallback(
     async (nextUser: User) => {
-      await persistUser({
-        ...nextUser,
-        tier: getTierName(nextUser.points),
+      await enqueueMutation(async () => {
+        await persistUser({
+          ...nextUser,
+          tier: getTierName(nextUser.points),
+        });
       });
     },
-    [persistUser],
+    [enqueueMutation, persistUser],
   );
 
   const addPoints = useCallback(
     async (points: number, reason: string) => {
-      if (!user) return;
-      const nextUser: User = {
-        ...user,
-        points: user.points + points,
-        tier: getTierName(user.points + points),
-      };
-      const transaction: RewardTransaction = {
-        id: `rt-${Date.now()}`,
-        date: new Date().toISOString().slice(0, 10),
-        description: reason,
-        points,
-        type: "earn",
-      };
-      const nextTransactions = [transaction, ...transactions];
-      setTransactions(nextTransactions);
-      await Promise.all([saveRewardTransactions(nextTransactions), persistUser(nextUser)]);
+      await enqueueMutation(async () => {
+        const currentUser = userRef.current;
+        if (!currentUser) return;
+        const nextUser: User = {
+          ...currentUser,
+          points: currentUser.points + points,
+          tier: getTierName(currentUser.points + points),
+        };
+        const transaction: RewardTransaction = {
+          id: `rt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          date: new Date().toISOString().slice(0, 10),
+          description: reason,
+          points,
+          type: "earn",
+        };
+        const nextTransactions = [transaction, ...transactionsRef.current];
+        await saveRewardsState(nextUser, nextTransactions);
+        userRef.current = nextUser;
+        transactionsRef.current = nextTransactions;
+        setUser(nextUser);
+        setTransactions(nextTransactions);
+      });
     },
-    [persistUser, transactions, user],
+    [enqueueMutation],
   );
 
   const redeemReward = useCallback(
     async (reward: Reward) => {
-      if (!user || user.points < reward.pointsNeeded) return false;
+      return enqueueMutation(async () => {
+        const currentUser = userRef.current;
+        if (!currentUser || currentUser.points < reward.pointsNeeded) return false;
 
-      const nextPoints = user.points - reward.pointsNeeded;
-      const nextUser: User = {
-        ...user,
-        points: nextPoints,
-        tier: getTierName(nextPoints),
-      };
-      const transaction: RewardTransaction = {
-        id: `rt-${Date.now()}`,
-        date: new Date().toISOString().slice(0, 10),
-        description: `Resgate: ${reward.title}`,
-        points: -reward.pointsNeeded,
-        type: "redeem",
-      };
-      const nextTransactions = [transaction, ...transactions];
-      setTransactions(nextTransactions);
-      await Promise.all([saveRewardTransactions(nextTransactions), persistUser(nextUser)]);
-      return true;
+        const nextPoints = currentUser.points - reward.pointsNeeded;
+        const nextUser: User = {
+          ...currentUser,
+          points: nextPoints,
+          tier: getTierName(nextPoints),
+        };
+        const transaction: RewardTransaction = {
+          id: `rt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          date: new Date().toISOString().slice(0, 10),
+          description: `Resgate: ${reward.title}`,
+          points: -reward.pointsNeeded,
+          type: "redeem",
+        };
+        const nextTransactions = [transaction, ...transactionsRef.current];
+        await saveRewardsState(nextUser, nextTransactions);
+        userRef.current = nextUser;
+        transactionsRef.current = nextTransactions;
+        setUser(nextUser);
+        setTransactions(nextTransactions);
+        return true;
+      });
     },
-    [persistUser, transactions, user],
+    [enqueueMutation],
   );
 
   return {

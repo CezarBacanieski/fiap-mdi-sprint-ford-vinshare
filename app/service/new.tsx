@@ -47,7 +47,7 @@ export default function NewServiceScreen() {
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [cepHint, setCepHint] = useState<string | null>(null);
   const { vehicles, isLoading: vehiclesLoading } = useVehicles();
   const { addService } = useServices();
@@ -136,9 +136,15 @@ export default function NewServiceScreen() {
         notes,
       };
       const service = await addService(input);
-      await scheduleServiceReminder(service);
-      setSnackbarVisible(true);
+      const reminderId = await scheduleServiceReminder(service);
+      setSnackbarMessage(
+        reminderId
+          ? "Agendamento criado e lembrete agendado."
+          : "Agendamento criado. O lembrete depende de permissão e dispositivo compatível.",
+      );
       setTimeout(() => router.replace("/(tabs)/services"), 850);
+    } catch {
+      setSnackbarMessage("Não foi possível criar o agendamento. Revise os dados e tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -351,8 +357,8 @@ export default function NewServiceScreen() {
         )}
       </View>
 
-      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={900}>
-        Agendamento confirmado. Lembrete criado.
+      <Snackbar visible={snackbarMessage.length > 0} onDismiss={() => setSnackbarMessage("")} duration={1600}>
+        {snackbarMessage}
       </Snackbar>
     </ScreenContainer>
   );

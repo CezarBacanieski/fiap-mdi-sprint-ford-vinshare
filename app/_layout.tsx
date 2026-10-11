@@ -4,8 +4,8 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
@@ -37,6 +37,7 @@ export default function RootLayout() {
 
 function RootNavigation() {
   const [seeded, setSeeded] = useState(false);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
   const [fontsLoaded] = useFonts({
     ...Ionicons.font,
     ...MaterialCommunityIcons.font,
@@ -45,15 +46,21 @@ function RootNavigation() {
   const router = useRouter();
   const segments = useSegments();
 
-  useEffect(() => {
-    const prepare = async () => {
+  const prepare = useCallback(async () => {
+    setInitializationError(null);
+    try {
       await seedInitialData();
       void requestNotificationPermissions();
       setSeeded(true);
-    };
-
-    void prepare();
+    } catch {
+      setInitializationError("Não foi possível preparar os dados locais do app.");
+      void SplashScreen.hideAsync();
+    }
   }, []);
+
+  useEffect(() => {
+    void prepare();
+  }, [prepare]);
 
   const ready = fontsLoaded && seeded && !isLoading;
 
@@ -73,6 +80,18 @@ function RootNavigation() {
 
     void SplashScreen.hideAsync();
   }, [isOnboarded, ready, router, segments]);
+
+  if (initializationError) {
+    return (
+      <View style={styles.loading}>
+        <Text style={styles.logo}>Ford+</Text>
+        <Text style={styles.subtitle}>{initializationError}</Text>
+        <Pressable accessibilityRole="button" onPress={() => void prepare()} style={styles.retryButton}>
+          <Text style={styles.retryText}>Tentar novamente</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (!ready) {
     return (
@@ -120,5 +139,18 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textSecondary,
     marginTop: spacing.sm,
+  },
+  retryButton: {
+    borderColor: colors.primaryLight,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  retryText: {
+    ...typography.body,
+    color: colors.primaryLight,
+    fontWeight: "700",
   },
 });

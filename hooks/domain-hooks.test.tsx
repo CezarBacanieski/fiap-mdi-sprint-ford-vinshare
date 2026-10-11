@@ -53,6 +53,18 @@ describe("domain hooks", () => {
     expect(result.current.vehicles).toEqual(mockVehicles);
   });
 
+  it("rejects invalid and duplicate vehicle plates", async () => {
+    const { result } = await renderHook(() => useVehicles());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await expect(result.current.addVehicle({ ...newVehicle, plate: "invalida" })).rejects.toThrow("placa brasileira");
+      await expect(result.current.addVehicle({ ...newVehicle, plate: mockVehicles[0].plate })).rejects.toThrow("já está cadastrado");
+    });
+
+    expect(result.current.vehicles).toEqual(mockVehicles);
+  });
+
   it("creates an appointment, persists it and exposes it as upcoming", async () => {
     const { result } = await renderHook(() => useServices());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -81,6 +93,26 @@ describe("domain hooks", () => {
       await result.current.reloadServices();
     });
     expect(result.current.services.some((service) => service.notes === "Teste automatizado")).toBe(true);
+  });
+
+  it("rejects an appointment with an unavailable vehicle or a past date", async () => {
+    const { result } = await renderHook(() => useServices());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const input: NewServiceInput = {
+      vehicleId: "missing-vehicle",
+      serviceTypes: ["Troca de Oleo"],
+      mileage: 43000,
+      dealershipId: "d-001",
+      date: "2030-05-20",
+      time: "10:00",
+      notes: "",
+    };
+
+    await act(async () => {
+      await expect(result.current.addService(input)).rejects.toThrow("veículo selecionado");
+      await expect(result.current.addService({ ...input, vehicleId: mockVehicles[0].id, date: "2020-05-20" })).rejects.toThrow("data e horário futuros");
+    });
   });
 
   it("updates rewards, persists transactions and blocks redemption with insufficient points", async () => {
@@ -130,6 +162,28 @@ describe("domain hooks", () => {
     expect(redeemed).toBe(true);
     expect(result.current.user?.points).toBe(mockUser.points - 500);
     expect(result.current.transactions[0]).toMatchObject({ points: -500, type: "redeem" });
+  });
+
+  it("serializes competing redemptions to prevent an insufficient balance", async () => {
+    const { result } = await renderHook(() => useRewards());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const reward = {
+      id: "reward-2",
+      icon: "percent",
+      title: "Desconto de teste",
+      description: "Teste",
+      pointsNeeded: 1000,
+      category: "discount" as const,
+    };
+
+    let outcomes: boolean[] = [];
+    await act(async () => {
+      outcomes = await Promise.all([result.current.redeemReward(reward), result.current.redeemReward(reward)]);
+    });
+
+    expect(outcomes).toEqual([true, false]);
+    expect(result.current.user?.points).toBe(mockUser.points - reward.pointsNeeded);
+    expect(result.current.transactions.filter((transaction) => transaction.description === "Resgate: Desconto de teste")).toHaveLength(1);
   });
 
   it("persists profile changes and restores them after a reload", async () => {
